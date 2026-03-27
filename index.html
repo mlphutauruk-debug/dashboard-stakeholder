@@ -1,978 +1,1003 @@
 <!DOCTYPE html>
 <html lang="id">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Dashboard Ekosistem Hilirisasi</title>
-    <!-- Load ECharts -->
-    <script src="https://cdn.jsdelivr.net/npm/echarts@5.4.3/dist/echarts.min.js"></script>
-    <script>
-        window.onload = function() {
-            if (typeof echarts === 'undefined') {
-                console.log('CDN failed, pastikan koneksi internet aktif.');
-            }
-        };
-    </script>
-    <style>
-        * {
-            margin: 0;
-            padding: 0;
-            box-sizing: border-box;
-        }
-
-        body {
-            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-            background: linear-gradient(135deg, #0f2027 0%, #203a43 50%, #2c5364 100%);
-            min-height: 100vh;
-            padding: 20px;
-        }
-
-        .container {
-            max-width: 1400px;
-            margin: 0 auto;
-            background: #ffffff;
-            border-radius: 16px;
-            box-shadow: 0 20px 60px rgba(0, 0, 0, 0.4);
-            overflow: hidden;
-        }
-
-        /* Header */
-        .header {
-            background: linear-gradient(135deg, #1F77D2 0%, #003D82 100%);
-            color: white;
-            padding: 30px 40px;
-            text-align: center;
-        }
-
-        .header h1 {
-            font-size: 32px;
-            margin-bottom: 8px;
-            font-weight: 700;
-        }
-
-        .header p {
-            font-size: 14px;
-            opacity: 0.9;
-        }
-
-        /* Tab Navigation */
-        .tab-navigation {
-            display: flex;
-            border-bottom: 2px solid #f0f0f0;
-            background: #fafafa;
-        }
-
-        .tab-button {
-            flex: 1;
-            padding: 16px 24px;
-            border: none;
-            background: none;
-            cursor: pointer;
-            font-size: 16px;
-            font-weight: 600;
-            color: #666;
-            border-bottom: 4px solid transparent;
-            transition: all 0.3s ease;
-        }
-
-        .tab-button:hover {
-            color: #1F77D2;
-            background: rgba(31, 119, 210, 0.05);
-        }
-
-        .tab-button.active {
-            color: #1F77D2;
-            border-bottom-color: #1F77D2;
-        }
-
-        /* Tab Content */
-        .tab-content {
-            display: none;
-            padding: 30px;
-            animation: fadeIn 0.3s ease;
-        }
-
-        .tab-content.active {
-            display: block;
-        }
-
-        @keyframes fadeIn {
-            from { opacity: 0; transform: translateY(10px); }
-            to { opacity: 1; transform: translateY(0); }
-        }
-
-        /* Stakeholder Mapping Tab */
-        .mapping-section {
-            display: flex;
-            gap: 24px;
-            flex-wrap: wrap;
-        }
-
-        .chart-container {
-            flex: 2.5;
-            min-width: 600px;
-            position: relative;
-        }
-
-        #tempat-diagram {
-            width: 100%;
-            height: 650px;
-            border-radius: 12px;
-            background: radial-gradient(circle, #ffffff 0%, #f4f7f6 100%);
-            border: 1px solid #e0e0e0;
-            box-shadow: inset 0 0 20px rgba(0,0,0,0.02);
-        }
-
-        .control-panel {
-            flex: 1;
-            background: #fdfdfd;
-            padding: 24px;
-            border-radius: 12px;
-            height: fit-content;
-            border: 1px solid #eee;
-        }
-
-        .control-panel h3 {
-            color: #1F77D2;
-            margin-bottom: 18px;
-            font-size: 16px;
-        }
-
-        .btn-edit {
-            width: 100%;
-            padding: 12px 20px;
-            background: linear-gradient(135deg, #1F77D2 0%, #003D82 100%);
-            color: white;
-            border: none;
-            border-radius: 8px;
-            font-size: 14px;
-            font-weight: 600;
-            cursor: pointer;
-            transition: all 0.3s ease;
-            margin-bottom: 12px;
-        }
-
-        .btn-edit:hover {
-            transform: translateY(-2px);
-            box-shadow: 0 8px 16px rgba(31, 119, 210, 0.3);
-        }
-
-        /* Data Info Box */
-        .data-info-container {
-            background: white;
-            border-radius: 12px;
-            padding: 20px;
-            margin-top: 16px;
-            border: 1px solid #eee;
-        }
-
-        .data-info-container h4 {
-            color: #1F77D2;
-            margin-bottom: 16px;
-            font-size: 13px;
-            text-transform: uppercase;
-            letter-spacing: 0.5px;
-        }
-
-        .info-stats {
-            display: grid;
-            grid-template-columns: 1fr 1fr;
-            gap: 10px;
-        }
-
-        .stat-item {
-            background: #f8f9fa;
-            padding: 12px;
-            border-radius: 8px;
-            text-align: center;
-            border-left: 4px solid #1F77D2;
-        }
-
-        .stat-value {
-            font-size: 22px;
-            font-weight: 700;
-            color: #333;
-        }
-
-        .stat-label {
-            font-size: 11px;
-            color: #666;
-            margin-top: 4px;
-        }
-
-        /* Form Controls */
-        .form-group { margin-bottom: 16px; }
-        .form-group label {
-            display: block;
-            color: #444;
-            font-weight: 600;
-            margin-bottom: 6px;
-            font-size: 13px;
-        }
-        .form-group input, .form-group select, .form-group textarea {
-            width: 100%;
-            padding: 10px 12px;
-            border: 1px solid #ccc;
-            border-radius: 6px;
-            font-size: 13px;
-            font-family: inherit;
-        }
-        .form-group input:focus, .form-group select:focus, .form-group textarea:focus {
-            outline: none;
-            border-color: #1F77D2;
-            box-shadow: 0 0 0 3px rgba(31,119,210,0.1);
-        }
-
-        /* Tables */
-        .table-container { overflow-x: auto; margin-top: 20px; }
-        .table-container table { width: 100%; border-collapse: collapse; }
-        .table-container th {
-            background: #f1f5f9;
-            color: #334155;
-            padding: 12px 14px;
-            text-align: left;
-            font-weight: 600;
-            font-size: 13px;
-            border-bottom: 2px solid #cbd5e1;
-        }
-        .table-container td {
-            padding: 12px 14px;
-            border-bottom: 1px solid #e2e8f0;
-            font-size: 13px;
-            color: #475569;
-        }
-        .table-container tbody tr:hover { background: #f8fafc; }
-
-        .btn-table-edit, .btn-table-delete {
-            padding: 6px 10px;
-            border: none;
-            border-radius: 4px;
-            font-size: 12px;
-            cursor: pointer;
-            margin-right: 4px;
-        }
-        .btn-table-edit { background: #eff6ff; color: #1d4ed8; border: 1px solid #bfdbfe; }
-        .btn-table-edit:hover { background: #dbeafe; }
-        .btn-table-delete { background: #fef2f2; color: #b91c1c; border: 1px solid #fecaca; }
-        .btn-table-delete:hover { background: #fee2e2; }
-
-        /* Modals */
-        .modal-overlay {
-            display: none;
-            position: fixed;
-            top: 0; left: 0; right: 0; bottom: 0;
-            background: rgba(15, 23, 42, 0.6);
-            backdrop-filter: blur(4px);
-            z-index: 999;
-            align-items: center;
-            justify-content: center;
-        }
-        .modal-overlay.show { display: flex; }
-        .modal-content {
-            background: white;
-            border-radius: 12px;
-            padding: 28px;
-            width: 90%;
-            max-width: 700px;
-            max-height: 90vh;
-            overflow-y: auto;
-            box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.25);
-            position: relative;
-        }
-        .modal-close {
-            position: absolute; top: 16px; right: 16px;
-            background: none; border: none; font-size: 24px; color: #94a3b8; cursor: pointer;
-        }
-        .modal-close:hover { color: #334155; }
-        
-        .flex-actions { display: flex; gap: 10px; margin-top: 20px; }
-        .btn-primary { background: #1F77D2; color: white; padding: 10px 16px; border: none; border-radius: 6px; cursor: pointer; flex: 1; font-weight: 600;}
-        .btn-secondary { background: #e2e8f0; color: #475569; padding: 10px 16px; border: none; border-radius: 6px; cursor: pointer; flex: 1; font-weight: 600;}
-
-        .legend-indicator {
-            display: inline-block;
-            width: 12px; height: 12px;
-            border-radius: 50%;
-            margin-right: 6px;
-            vertical-align: middle;
-        }
-    </style>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Dashboard Ekosistem Hilirisasi PRO</title>
+    <!-- Load ECharts -->
+    <script src="./echarts.min.js"></script>x
+    <link rel="stylesheet" href="styles.css">
 </head>
 <body>
-    <div class="container">
-        <!-- Header -->
-        <div class="header">
-            <h1>🌐 Peta Ekosistem Hilirisasi</h1>
-            <p>Force-Directed Network Map & Database Stakeholder</p>
-        </div>
 
-        <!-- Tab Navigation -->
-        <div class="tab-navigation">
-            <button class="tab-button active" onclick="switchTab('mapping')">
-                🗺️ Network Map
-            </button>
-            <button class="tab-button" onclick="switchTab('sources')">
-                📁 Tabel Data & Relasi
-            </button>
-        </div>
+    <div id="toast-container"></div>
 
-        <!-- Tab 1: Network Mapping -->
-        <div id="mapping" class="tab-content active">
-            <div class="mapping-section">
-                <!-- Chart -->
-                <div class="chart-container">
-                    <div id="tempat-diagram"></div>
-                    <p style="font-size: 12px; color: #666; position: absolute; bottom: -25px; left: 0;">
-                        💡 <b>Tips:</b> Anda bisa menarik (drag) bulatan lembaga. Arahkan kursor pada tautan (garis putus/solid) atau bulatan untuk melihat rincian kerjanya.
-                    </p>
-                </div>
+    <div class="container">
+        <!-- Header -->
+        <header class="header">
+            <div>
+                <h1>🌐 Peta Ekosistem Hilirisasi PRO</h1>
+                <p style="opacity: 0.8; font-size: 13px;">Full Database Stakeholder & Network Analysis</p>
+            </div>
+            <div style="display: flex; gap: 10px;">
+                <button class="btn btn-success" onclick="exportData()">📊 Export Excel (ID)</button>
+                <button class="btn btn-danger" onclick="resetDatabase()">⚠️ Reset Data</button>
+            </div>
+        </header>
 
-                <!-- Control Panel -->
-                <div class="control-panel">
-                    <h3>🎛️ Panel Kontrol</h3>
-                    <button class="btn-edit" onclick="toggleForm('addStakeholderModal')">
-                        ➕ Tambah Stakeholder
-                    </button>
-                    <button class="btn-edit" onclick="toggleForm('relationModal')" style="background: linear-gradient(135deg, #10b981 0%, #059669 100%);">
-                        🔗 Hubungkan Lembaga
-                    </button>
+        <!-- Tabs -->
+        <nav class="tab-navigation" role="tablist" aria-label="Navigasi Dashboard">
+            <button id="tab-mapping" class="tab-button active" role="tab" aria-selected="true" aria-controls="mapping" tabindex="0" data-tab="mapping" onclick="switchTab('mapping', this)">🗺️ Visual Mapping</button>
+            <button id="tab-database" class="tab-button" role="tab" aria-selected="false" aria-controls="database" tabindex="-1" data-tab="database" onclick="switchTab('database', this)">📋 Database Stakeholder</button>
+            <button id="tab-notulensi" class="tab-button" role="tab" aria-selected="false" aria-controls="notulensi" tabindex="-1" data-tab="notulensi" onclick="switchTab('notulensi', this)">📝 Kontak & Notulensi</button>
+        </nav>
 
-                    <!-- Stats -->
-                    <div class="data-info-container">
-                        <h4>📈 Metrik Jaringan</h4>
-                        <div class="info-stats">
-                            <div class="stat-item" style="border-color: #3b82f6;">
-                                <div class="stat-value" id="stat-total">0</div>
-                                <div class="stat-label">Total Lembaga</div>
-                            </div>
-                            <div class="stat-item" style="border-color: #10b981;">
-                                <div class="stat-value" id="stat-relasi">0</div>
-                                <div class="stat-label">Total Tautan Relasi</div>
-                            </div>
-                            <div class="stat-item" style="border-color: #8b5cf6; grid-column: span 2;">
-                                <div class="stat-value" id="stat-pusat" style="font-size: 18px;">-</div>
-                                <div class="stat-label">Lembaga Tersentral (Orkestrator)</div>
-                            </div>
-                        </div>
-                    </div>
+        <!-- Tab 1: Mapping -->
+        <div id="mapping" class="tab-content active" role="tabpanel" aria-labelledby="tab-mapping">
+            <div class="main-layout">
+                <div>
+                    <div class="card" style="padding: 10px;">
+                        <div id="network-chart" class="chart-container"></div>
+                    </div>
+                </div>
+                
+                <div class="side-panel">
+                    <div class="card">
+                        <h3 style="font-size: 14px; margin-bottom: 15px;">📊 Komposisi Stakeholder</h3>
+                        <div id="summary-chart"></div>
+                    </div>
 
-                    <div class="data-info-container">
-                        <h4>Keterangan Kategori</h4>
-                        <div style="font-size: 12px; line-height: 1.8; color: #444;">
-                            <div><span class="legend-indicator" style="background: #e74c3c;"></span>Pemerintah</div>
-                            <div><span class="legend-indicator" style="background: #2ecc71;"></span>BUMN</div>
-                            <div><span class="legend-indicator" style="background: #3498db;"></span>Swasta</div>
-                            <div><span class="legend-indicator" style="background: #9b59b6;"></span>Akademisi</div>
-                            <div><span class="legend-indicator" style="background: #1abc9c;"></span>Riset / NGO</div>
-                            <div><span class="legend-indicator" style="background: #f1c40f;"></span>Asosiasi Profesi</div>
-                        </div>
-                    </div>
-                </div>
-            </div>
-        </div>
+                    <div class="card">
+                        <h3 style="font-size: 14px; margin-bottom: 10px;">🎛️ Kontrol Visual</h3>
+                        <div class="slider-group">
+                            <label style="font-size: 11px; font-weight: 600;">Jarak Antar Lembaga (Repulsion)</label>
+                            <input type="range" id="repulsion-slider" min="100" max="3000" value="800" style="width: 100%; margin: 10px 0;" oninput="updateVisuals()">
+                            <div style="display: flex; justify-content: space-between; font-size: 10px; color: #94a3b8;">
+                                <span>Rapat</span>
+                                <span>Renggang</span>
+                            </div>
+                        </div>
+                        <p style="font-size: 11px; color: #64748b; margin-top: 15px; line-height: 1.4;">
+                            💡 <b>Tips:</b> Tarik bulatan untuk mengatur posisi. Klik untuk fokus pada relasi terdekat.
+                        </p>
+                    </div>
 
-        <!-- Tab 2: Sumber Data -->
-        <div id="sources" class="tab-content">
-            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px;">
-                <h2 style="color: #1F77D2; font-size: 22px;">📋 Database Stakeholder Hilirisasi</h2>
-                <button onclick="exportToExcel()" class="btn-primary" style="max-width: 200px; background: #10b981;">
-                    📊 Export CSV (Excel)
-                </button>
-            </div>
-            
-            <div class="table-container">
-                <table>
-                    <thead>
-                        <tr>
-                            <th>ID</th>
-                            <th>Label/Nama Lembaga</th>
-                            <th>Kategori Utama</th>
-                            <th>Posisi / Peran</th>
-                            <th>Bobot/Kepentingan</th>
-                            <th>Aksi</th>
-                        </tr>
-                    </thead>
-                    <tbody id="tabel-data"></tbody>
-                </table>
-            </div>
+                    <button class="btn btn-primary" style="width: 100%;" onclick="prepareNewStakeholder()">➕ Tambah Lembaga Baru</button>
+                    <button class="btn btn-ghost" style="width: 100%; margin-top: 10px;" onclick="openModal('modal-relation')">🔗 Tambah Relasi Kerja</button>
+                </div>
+            </div>
+        </div>
 
-            <h3 style="color: #1F77D2; margin-top: 40px; margin-bottom: 16px; font-size: 18px;">🔗 Daftar Relasi Antar Lembaga</h3>
-            <div class="table-container">
-                <table>
-                    <thead>
-                        <tr>
-                            <th>No</th>
-                            <th>Lembaga (Source)</th>
-                            <th>Lembaga (Target)</th>
-                            <th>Tipe Garis</th>
-                            <th>Deskripsi Relasi / Tipe</th>
-                            <th>Aksi</th>
-                        </tr>
-                    </thead>
-                    <tbody id="tabel-relasi"></tbody>
-                </table>
-            </div>
-        </div>
-    </div>
+        <!-- Tab 2: Database -->
+        <div id="database" class="tab-content" role="tabpanel" aria-labelledby="tab-database">
+            <div class="card">
+                <div style="display: flex; gap: 15px; margin-bottom: 20px;">
+                    <input type="text" id="search-db" class="input-text" placeholder="Cari 33+ lembaga..." oninput="renderTable()">
+                </div>
+                <p id="db-count" style="font-size: 12px; color: #64748b; margin-bottom: 12px;"></p>
+                <div class="table-wrap">
+                    <table>
+                        <thead>
+                            <tr>
+                                <th>ID</th>
+                                <th>Nama Lembaga</th>
+                                <th>Kategori</th>
+                                <th>Peran Spesifik</th>
+                                <th>Kepentingan (Z)</th>
+                                <th>Aksi</th>
+                            </tr>
+                        </thead>
+                        <tbody id="table-body"></tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
 
-    <!-- MODALS -->
-    <!-- Modal Tambah/Edit Stakeholder -->
-    <div class="modal-overlay" id="addStakeholderModal">
-        <div class="modal-content">
-            <button class="modal-close" onclick="closeForm('addStakeholderModal')">&times;</button>
-            <h3 style="color: #1F77D2; margin-bottom: 20px;" id="formTitle">Form Stakeholder</h3>
-            <form id="stakeholderForm" onsubmit="saveStakeholder(event)">
-                <input type="hidden" id="editIndex" value="-1">
-                
-                <div style="display: grid; grid-template-columns: 1fr 2fr; gap: 12px;">
-                    <div class="form-group">
-                        <label>ID Simpul (Kode Pendek)</label>
-                        <input type="text" id="inputId" required placeholder="Contoh: Bappenas">
-                    </div>
-                    <div class="form-group">
-                        <label>Nama Lengkap Lembaga</label>
-                        <input type="text" id="inputNama" required placeholder="Kementerian PPN/Bappenas">
-                    </div>
-                </div>
+        <!-- Tab 3: Notulensi -->
+        <div id="notulensi" class="tab-content" role="tabpanel" aria-labelledby="tab-notulensi">
+            <div class="card">
+                <input type="text" id="search-not" class="input-text" placeholder="Cari kontak atau notulensi..." style="margin-bottom: 20px;" oninput="renderNotulensi()">
+                <p id="not-count" style="font-size: 12px; color: #64748b; margin-bottom: 12px;"></p>
+                <div class="table-wrap">
+                    <table>
+                        <thead>
+                            <tr>
+                                <th>Lembaga</th>
+                                <th>PIC / Kontak</th>
+                                <th>Lokasi Kantor</th>
+                                <th>Tautan Notulensi</th>
+                                <th>Aksi</th>
+                            </tr>
+                        </thead>
+                        <tbody id="notulensi-body"></tbody>
+                    </table>
+                </div>
+            </div>
 
-                <div class="form-group">
-                    <label>Kategori Utama</label>
-                    <select id="inputKategori" required>
-                        <option value="Pemerintah">Pemerintah</option>
-                        <option value="BUMN">BUMN</option>
-                        <option value="Swasta">Swasta</option>
-                        <option value="Akademisi">Akademisi</option>
-                        <option value="Riset/NGO">Riset / NGO</option>
-                        <option value="Profesi">Asosiasi Profesi</option>
-                    </select>
-                </div>
+            <div class="card">
+                <div style="display:flex; align-items:center; justify-content:space-between; gap:10px; margin-bottom: 15px;">
+                    <h3>🗂️ Ringkasan Notulensi Diskusi Historis</h3>
+                    <button class="btn btn-primary" onclick="openDiskusiModal()">➕ Tambah Catatan</button>
+                </div>
+                <div class="table-wrap" style="max-height: 360px; overflow-y: auto;">
+                    <table>
+                        <thead>
+                            <tr>
+                                <th>Tgl</th>
+                                <th>Tempat</th>
+                                <th>Pembicara</th>
+                                <th>Lembaga</th>
+                                <th>ID Entitas</th>
+                                <th>Topik</th>
+                                <th>Kesimpulan</th>
+                                <th>Aksi</th>
+                            </tr>
+                        </thead>
+                        <tbody id="diskusi-body"></tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+    </div>
 
-                <div class="form-group">
-                    <label>Posisi / Peran Spesifik (Deskripsi Singkat)</label>
-                    <textarea id="inputPeran" rows="2" placeholder="Contoh: Koordinator Nasional"></textarea>
-                </div>
+    <!-- Modals -->
+    <!-- Modal Stakeholder -->
+    <div id="modal-stakeholder" class="modal-overlay" role="dialog" aria-modal="true" aria-labelledby="modal-title" aria-hidden="true">
+        <div class="modal-card">
+            <div style="padding: 20px; background: #f8fafc; border-bottom: 1px solid #e2e8f0; display: flex; justify-content: space-between;">
+                <h2 id="modal-title">Data Stakeholder</h2>
+                <button onclick="closeModal('modal-stakeholder')" style="background:none; border:none; font-size: 20px; cursor:pointer;">&times;</button>
+            </div>
+            <form onsubmit="saveStakeholder(event)" style="padding: 25px;">
+                <input type="hidden" id="edit-idx" value="-1">
+                <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 15px;">
+                    <div class="form-group">
+                        <label>ID Simpul (Kode)</label>
+                        <input type="text" id="in-id" class="input-text" required placeholder="Contoh: ESDM">
+                    </div>
+                    <div class="form-group">
+                        <label>Kategori</label>
+                        <select id="in-cat" class="input-text">
+                            <option value="Pemerintah">Pemerintah</option>
+                            <option value="BUMN">BUMN</option>
+                            <option value="Swasta">Swasta</option>
+                            <option value="Akademisi">Akademisi</option>
+                            <option value="Riset/NGO">Riset / NGO</option>
+                            <option value="Profesi">Asosiasi Profesi</option>
+                        </select>
+                    </div>
+                </div>
+                <div class="form-group">
+                    <label>Nama Lengkap Lembaga</label>
+                    <input type="text" id="in-name" class="input-text" required>
+                </div>
+                <div class="form-group">
+                    <label>Peran / Deskripsi</label>
+                    <input type="text" id="in-peran" class="input-text">
+                </div>
+                <div style="display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 15px;">
+                    <div class="form-group">
+                        <label>Sikap (X)</label>
+                        <input type="number" id="in-x" class="input-text" value="50">
+                    </div>
+                    <div class="form-group">
+                        <label>Terlibat (Y)</label>
+                        <input type="number" id="in-y" class="input-text" value="50">
+                    </div>
+                    <div class="form-group">
+                        <label>Dampak (Z)</label>
+                        <input type="number" id="in-z" class="input-text" value="70">
+                    </div>
+                </div>
+                <button type="submit" class="btn btn-primary" style="width: 100%;">Simpan Data</button>
+            </form>
+        </div>
+    </div>
 
-                <div style="display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 12px; background: #f8fafc; padding: 12px; border-radius: 8px;">
-                    <div class="form-group" style="margin-bottom:0;">
-                        <label title="Sikap terhadap program (0-100)">Sikap (X)</label>
-                        <input type="number" id="inputX" min="0" max="100" value="50" required>
-                    </div>
-                    <div class="form-group" style="margin-bottom:0;">
-                        <label title="Tingkat keaktifan/keterlibatan (0-100)">Terlibat (Y)</label>
-                        <input type="number" id="inputY" min="0" max="100" value="50" required>
-                    </div>
-                    <div class="form-group" style="margin-bottom:0;">
-                        <label title="Kepentingan/Pengaruh pada Peta (1-100)">Kepentingan (Z)</label>
-                        <input type="number" id="inputZ" min="0" max="100" value="50" required>
-                    </div>
-                </div>
+    <!-- Modal Relation -->
+    <div id="modal-relation" class="modal-overlay" role="dialog" aria-modal="true" aria-labelledby="modal-relation-title" aria-hidden="true">
+        <div class="modal-card">
+            <div style="padding: 20px; background: #f8fafc; border-bottom: 1px solid #e2e8f0;">
+                <h2 id="modal-relation-title">🔗 Hubungkan Relasi Baru</h2>
+            </div>
+            <form onsubmit="saveRelation(event)" style="padding: 25px;">
+                <div class="form-row" style="display: grid; grid-template-columns: 1fr 1fr; gap: 15px;">
+                    <div class="form-group">
+                        <label>Sumber (A)</label>
+                        <select id="rel-src" class="input-text" required></select>
+                    </div>
+                    <div class="form-group">
+                        <label>Target (B)</label>
+                        <select id="rel-tgt" class="input-text" required></select>
+                    </div>
+                </div>
+                <div class="form-group">
+                    <label>Deskripsi Relasi</label>
+                    <textarea id="rel-desc" class="input-text" style="height: 80px;" placeholder="Contoh: Sinkronisasi data realisasi..."></textarea>
+                </div>
+                <div class="form-group">
+                    <label>Tipe Garis</label>
+                    <select id="rel-type" class="input-text">
+                        <option value="solid">Solid (Kuat/Formal)</option>
+                        <option value="dashed">Dashed (Koordinasi/Informal)</option>
+                    </select>
+                </div>
+                <div style="display: flex; gap: 10px; margin-top: 10px;">
+                    <button type="submit" class="btn btn-success" style="flex: 1;">Simpan Relasi</button>
+                    <button type="button" class="btn btn-ghost" style="flex: 1;" onclick="closeModal('modal-relation')">Batal</button>
+                </div>
+            </form>
+        </div>
+    </div>
 
-                <div class="flex-actions">
-                    <button type="submit" class="btn-primary">Simpan Data</button>
-                    <button type="button" class="btn-secondary" onclick="closeForm('addStakeholderModal')">Batal</button>
-                </div>
-            </form>
-        </div>
-    </div>
+    <!-- Modal Confirm -->
+    <div id="modal-confirm" class="modal-overlay" role="dialog" aria-modal="true" aria-labelledby="confirm-title" aria-hidden="true">
+        <div class="modal-card" style="max-width: 400px; text-align: center; padding: 30px;">
+            <div style="font-size: 50px; color: var(--danger); margin-bottom: 15px;">⚠️</div>
+            <h3 id="confirm-title">Konfirmasi Hapus</h3>
+            <p id="confirm-msg" style="color: #64748b; font-size: 14px; margin-top: 10px;"></p>
+            <div style="display: flex; gap: 10px; margin-top: 25px;">
+                <button id="confirm-yes" class="btn btn-danger" style="flex: 1;">Ya, Hapus</button>
+                <button onclick="closeModal('modal-confirm')" class="btn btn-ghost" style="flex: 1;">Batal</button>
+            </div>
+        </div>
+    </div>
 
-    <!-- Modal Kelola Relasi -->
-    <div class="modal-overlay" id="relationModal">
-        <div class="modal-content">
-            <button class="modal-close" onclick="closeForm('relationModal')">&times;</button>
-            <h3 style="color: #1F77D2; margin-bottom: 20px;">🔗 Hubungkan Lembaga</h3>
-            <form onsubmit="saveRelation(event)">
-                <div class="form-group">
-                    <label>Simpul Sumber (A):</label>
-                    <select id="sourceStakeholder" required></select>
-                </div>
-                <div class="form-group">
-                    <label>Simpul Target (B):</label>
-                    <select id="targetStakeholder" required></select>
-                </div>
+    <!-- Modal Notulensi -->
+    <div id="modal-notulensi" class="modal-overlay" role="dialog" aria-modal="true" aria-labelledby="modal-notulensi-title" aria-hidden="true">
+        <div class="modal-card">
+            <div style="padding: 20px; background: #f8fafc; border-bottom: 1px solid #e2e8f0; display: flex; justify-content: space-between; align-items: center;">
+                <h2 id="modal-notulensi-title" style="font-size: 18px;">📝 Update Kontak & Notulensi</h2>
+                <button type="button" onclick="closeModal('modal-notulensi')" style="background:none; border:none; font-size: 20px; cursor:pointer;">&times;</button>
+            </div>
+            <form onsubmit="saveQuickNotulensi(event)" style="padding: 25px;">
+                <input type="hidden" id="quick-note-id">
+                <div class="form-group">
+                    <label>Lembaga</label>
+                    <input type="text" id="quick-note-name" class="input-text" readonly>
+                </div>
+                <div class="form-group">
+                    <label>PIC/Kontak</label>
+                    <input type="text" id="quick-note-contact" class="input-text" placeholder="Nama PIC, email, atau nomor telepon">
+                </div>
+                <div class="form-group">
+                    <label>Lokasi Kantor</label>
+                    <input type="text" id="quick-note-office" class="input-text" placeholder="Contoh: Jakarta Selatan">
+                </div>
+                <div class="form-group">
+                    <label>Link Notulensi (satu link per baris)</label>
+                    <textarea id="quick-note-links" class="input-text" style="min-height: 120px;" placeholder="https://..."></textarea>
+                </div>
+                <div style="display: flex; gap: 10px;">
+                    <button type="submit" class="btn btn-success" style="flex: 1;">Simpan</button>
+                    <button type="button" class="btn btn-ghost" style="flex: 1;" onclick="closeModal('modal-notulensi')">Batal</button>
+                </div>
+            </form>
+        </div>
+    </div>
 
-                <div class="form-group">
-                    <label>Garis Relasi:</label>
-                    <select id="relationLineType" required>
-                        <option value="solid">Solid (Hubungan Langsung/Formal/Kuat)</option>
-                        <option value="dashed">Putus-putus (Koordinasi/Informal/Data)</option>
-                    </select>
-                </div>
-                
-                <div class="form-group">
-                    <label>Deskripsi Relasi Lengkap:</label>
-                    <textarea id="relationType" rows="3" placeholder="Contoh: Pembiayaan: Koordinasi percepatan pembiayaan proyek"></textarea>
-                </div>
+    <!-- Modal Diskusi -->
+    <div id="modal-diskusi" class="modal-overlay" role="dialog" aria-modal="true" aria-labelledby="modal-diskusi-title" aria-hidden="true">
+        <div class="modal-card">
+            <div style="padding: 20px; background: #f8fafc; border-bottom: 1px solid #e2e8f0; display:flex; justify-content:space-between; align-items:center;">
+                <h2 id="modal-diskusi-title" style="font-size: 18px;">🗂️ Catatan Diskusi</h2>
+                <button type="button" onclick="closeModal('modal-diskusi')" style="background:none; border:none; font-size: 20px; cursor:pointer;">&times;</button>
+            </div>
+            <form onsubmit="saveDiskusiRecord(event)" style="padding: 25px;">
+                <input type="hidden" id="diskusi-edit-idx" value="-1">
+                <div class="form-group">
+                    <label>Tanggal</label>
+                    <input type="text" id="diskusi-tanggal" class="input-text" placeholder="Contoh: 27 Januari 2026" required>
+                </div>
+                <div class="form-group">
+                    <label>Tempat</label>
+                    <input type="text" id="diskusi-tempat" class="input-text" required>
+                </div>
+                <div class="form-group">
+                    <label>Pembicara</label>
+                    <input type="text" id="diskusi-pembicara" class="input-text" required>
+                </div>
+                <div class="form-group">
+                    <label>Lembaga (teks bebas)</label>
+                    <input type="text" id="diskusi-lembaga" class="input-text" required>
+                </div>
+                <div class="form-group">
+                    <label>ID Entitas Terkait (pisahkan koma)</label>
+                    <input type="text" id="diskusi-entity-ids" class="input-text" placeholder="Contoh: Bappenas, BIM">
+                </div>
+                <div class="form-group">
+                    <label>Topik</label>
+                    <input type="text" id="diskusi-topik" class="input-text" required>
+                </div>
+                <div class="form-group">
+                    <label>Kesimpulan</label>
+                    <textarea id="diskusi-hasil" class="input-text" style="min-height: 100px;" required></textarea>
+                </div>
+                <div style="display:flex; gap:10px;">
+                    <button class="btn btn-success" type="submit" style="flex:1;">Simpan Catatan</button>
+                    <button class="btn btn-ghost" type="button" style="flex:1;" onclick="closeModal('modal-diskusi')">Batal</button>
+                </div>
+            </form>
+        </div>
+    </div>
 
-                <div class="form-group">
-                    <label>Intensitas Garis (1-10):</label>
-                    <div style="display: flex; align-items: center; gap: 12px;">
-                        <input type="range" id="relationStrength" min="1" max="10" value="3" oninput="document.getElementById('strengthVal').innerText = this.value" style="flex: 1;">
-                        <span id="strengthVal" style="font-weight: bold; width: 20px;">3</span>
-                    </div>
-                </div>
-                
-                <div class="flex-actions">
-                    <button type="submit" class="btn-primary">Simpan Relasi</button>
-                    <button type="button" class="btn-secondary" onclick="closeForm('relationModal')">Batal</button>
-                </div>
-            </form>
-        </div>
-    </div>
+    <!-- Modal Ringkasan Entitas -->
+    <div id="modal-entity" class="modal-overlay" role="dialog" aria-modal="true" aria-labelledby="modal-entity-title" aria-hidden="true">
+        <div class="modal-card" style="max-width: 860px;">
+            <div style="padding: 20px; background: #f8fafc; border-bottom: 1px solid #e2e8f0; display:flex; justify-content:space-between; align-items:center;">
+                <h2 id="modal-entity-title" style="font-size: 18px;">📌 Ringkasan Entitas</h2>
+                <button type="button" onclick="closeModal('modal-entity')" style="background:none; border:none; font-size:20px; cursor:pointer;">&times;</button>
+            </div>
+            <div id="entity-insight-body" style="padding: 20px;"></div>
+        </div>
+    </div>
 
-    <script>
-        var grafik;
-        
-        // Kategori Warna
-        const categoryColors = {
-            'Pemerintah': '#e74c3c', 
-            'BUMN': '#2ecc71',       
-            'Swasta': '#3498db',     
-            'Akademisi': '#9b59b6',  
-            'Riset/NGO': '#1abc9c',  
-            'Profesi': '#f1c40f'     
-        };
+    <script>
+        // --- MASTER DATA (RESTORATION) ---
+        const initialNodes = [
+            { id: 'Bappenas', name: 'Kementerian PPN/Bappenas', category: 'Pemerintah', value: [50, 50, 100], peran: '10 (Koordinator Nasional)' },
+            { id: 'BIM', name: 'Badan Industri Mineral', category: 'Pemerintah', value: [50, 50, 100], peran: '10 (Orkestrator Mineral)' },
+            { id: 'ESDM', name: 'Kementerian ESDM', category: 'Pemerintah', value: [50, 50, 90], peran: '9 (Regulator Hulu)' },
+            { id: 'Kemenperin', name: 'Kementerian Perindustrian', category: 'Pemerintah', value: [50, 50, 80], peran: '8 (Regulator Industri)' },
+            { id: 'Kemenveshil', name: 'Kementerian Investasi & Hilirisasi/BKPM', category: 'Pemerintah', value: [50, 50, 80], peran: '8 (Fasilitator Investasi Utama)' },
+            { id: 'Kemenkeu', name: 'Kementerian Keuangan', category: 'Pemerintah', value: [50, 50, 70], peran: '7 (Kebijakan Fiskal)' },
+            { id: 'Kemendag', name: 'Kementerian Perdagangan', category: 'Pemerintah', value: [50, 50, 70], peran: '7 (Regulasi Ekspor-Impor)' },
+            { id: 'BI', name: 'Bank Indonesia', category: 'Pemerintah', value: [50, 50, 60], peran: '6 (Intermediasi Pembiayaan)' },
+            { id: 'BRIN', name: 'BRIN', category: 'Riset/NGO', value: [50, 50, 60], peran: '6 (Pelaksana Riset)' },
+            { id: 'B Geologi', name: 'Badan Geologi', category: 'Pemerintah', value: [50, 50, 70], peran: '7 (Data Sumber Daya Primer)' },
+            { id: 'Pertamina', name: 'Pertamina Group (KPI/TPPI)', category: 'BUMN', value: [50, 50, 80], peran: '8 (Hilirisasi Migas)' },
+            { id: 'MIND_ID', name: 'MIND ID (Antam/Timah/Inalum)', category: 'BUMN', value: [50, 50, 80], peran: '8 (Hilirisasi Minerba)' },
+            { id: 'PLN', name: 'PT PLN (Persero)', category: 'BUMN', value: [50, 50, 70], peran: '7 (Penyedia Energi Smelter)' },
+            { id: 'PTFI', name: 'PT Freeport Indonesia', category: 'Swasta', value: [50, 50, 70], peran: '7 (Smelter Tembaga)' },
+            { id: 'Harita', name: 'Harita Group', category: 'Swasta', value: [50, 50, 60], peran: '6 (Smelter Nikel)' },
+            { id: 'Lotte', name: 'Lotte Chemical', category: 'Swasta', value: [50, 50, 60], peran: '6 (Petrokimia)' },
+            { id: 'ITB', name: 'Akademisi ITB (FTTM)', category: 'Akademisi', value: [50, 50, 60], peran: '6 (Riset Teknologi)' },
+            { id: 'WRI', name: 'WRI Indonesia', category: 'Riset/NGO', value: [50, 50, 50], peran: '5 (Peta Jalan Dekarbonisasi)' },
+            { id: 'SMI', name: 'PT Sarana Multi Infrastruktur', category: 'BUMN', value: [50, 50, 50], peran: '5 (Pendanaan Publik)' },
+            { id: 'Asosiasi', name: 'Perhapi/IAGI/MGII', category: 'Profesi', value: [50, 50, 50], peran: '5 (Standarisasi Data)' },
+            { id: 'TPPI', name: 'PT TPPI', category: 'BUMN', value: [50, 50, 70], peran: '7 (Hilirisasi Petrokimia)' },
+            { id: 'Pemerintah RI', name: 'Pemerintah Republik Indonesia', category: 'Pemerintah', value: [50, 50, 100], peran: '10 (Pemegang Saham Mayoritas)' },
+            { id: 'BPS', name: 'Badan Pusat Statistik', category: 'Pemerintah', value: [50, 50, 60], peran: '6 (Statistik Data Makro)' },
+            { id: 'Kemenhan / TNI / BIN', name: 'Kemenhan / TNI / BIN', category: 'Pemerintah', value: [50, 50, 70], peran: '7 (Keamanan Strategis Nasional)' },
+            { id: 'BPKP / KPK', name: 'BPKP / KPK', category: 'Pemerintah', value: [50, 50, 80], peran: '8 (Pengawasan Penegakan Hukum)' },
+            { id: 'KLHK / ATR BPN', name: 'KLHK / ATR BPN', category: 'Pemerintah', value: [50, 50, 80], peran: '8 (Perizinan Lahan & Lingkungan)' },
+            { id: 'Antam', name: 'PT Aneka Tambang Tbk', category: 'BUMN', value: [50, 50, 70], peran: '7 (Pengolahan Hilir Lanjutan)' },
+            { id: 'BYD / CATL', name: 'BYD / CATL', category: 'Swasta', value: [50, 50, 70], peran: '7 (Manufaktur Baterai EV & Ekosistem)' },
+            { id: 'Polytama', name: 'PT Polytama Propindo', category: 'Swasta', value: [50, 50, 60], peran: '6 (Produk Polimer Turunan)' },
+            { id: 'PT KPI', name: 'PT Kilang Pertamina Internasional', category: 'BUMN', value: [50, 50, 80], peran: '8 (Integrasi Kilang)' },
+            { id: 'UoP (USA)', name: 'UoP (Amerika Serikat)', category: 'Swasta', value: [50, 50, 70], peran: '7 (Penyedia Lisensi Teknologi)' },
+            { id: 'Danantara', name: 'Badan Pengelola Investasi Danantara', category: 'Pemerintah', value: [50, 50, 80], peran: '8 (Koordinasi Strategis PSN)' },
+            { id: 'Pemda / Bappeda', name: 'Pemda & Bappeda', category: 'Pemerintah', value: [50, 50, 70], peran: '7 (Penyelarasan Regulasi Daerah)' }
+        ];
 
-        // Data Inti Stakeholder (Nodes)
-        var stakeholderData = [
-            { id: 'Bappenas', name: 'Kementerian PPN/Bappenas', category: 'Pemerintah', value: [50, 50, 100], detail: { peran: '10 (Koordinator Nasional)' } },
-            { id: 'BIM', name: 'Badan Industri Mineral', category: 'Pemerintah', value: [50, 50, 100], detail: { peran: '10 (Orkestrator Mineral)' } },
-            { id: 'ESDM', name: 'Kementerian ESDM', category: 'Pemerintah', value: [50, 50, 90], detail: { peran: '9 (Regulator Hulu)' } },
-            { id: 'Kemenperin', name: 'Kementerian Perindustrian', category: 'Pemerintah', value: [50, 50, 80], detail: { peran: '8 (Regulator Industri)' } },
-            { id: 'Kemenveshil', name: 'Kementerian Investasi & Hilirisasi/BKPM', category: 'Pemerintah', value: [50, 50, 80], detail: { peran: '8 (Fasilitator Investasi Utama)' } },
-            { id: 'Kemenkeu', name: 'Kementerian Keuangan', category: 'Pemerintah', value: [50, 50, 70], detail: { peran: '7 (Kebijakan Fiskal)' } },
-            { id: 'Kemendag', name: 'Kementerian Perdagangan', category: 'Pemerintah', value: [50, 50, 70], detail: { peran: '7 (Regulasi Ekspor-Impor)' } },
-            { id: 'BI', name: 'Bank Indonesia', category: 'Pemerintah', value: [50, 50, 60], detail: { peran: '6 (Intermediasi Pembiayaan)' } },
-            { id: 'BRIN', name: 'BRIN', category: 'Riset/NGO', value: [50, 50, 60], detail: { peran: '6 (Pelaksana Riset)' } },
-            { id: 'B Geologi', name: 'Badan Geologi', category: 'Pemerintah', value: [50, 50, 70], detail: { peran: '7 (Data Sumber Daya Primer)' } },
-            { id: 'Pertamina', name: 'Pertamina Group (KPI/TPPI)', category: 'BUMN', value: [50, 50, 80], detail: { peran: '8 (Hilirisasi Migas)' } },
-            { id: 'MIND_ID', name: 'MIND ID (Antam/Timah/Inalum)', category: 'BUMN', value: [50, 50, 80], detail: { peran: '8 (Hilirisasi Minerba)' } },
-            { id: 'PLN', name: 'PT PLN (Persero)', category: 'BUMN', value: [50, 50, 70], detail: { peran: '7 (Penyedia Energi Smelter)' } },
-            { id: 'PTFI', name: 'PT Freeport Indonesia', category: 'Swasta', value: [50, 50, 70], detail: { peran: '7 (Smelter Tembaga)' } },
-            { id: 'Harita', name: 'Harita Group', category: 'Swasta', value: [50, 50, 60], detail: { peran: '6 (Smelter Nikel)' } },
-            { id: 'Lotte', name: 'Lotte Chemical', category: 'Swasta', value: [50, 50, 60], detail: { peran: '6 (Petrokimia)' } },
-            { id: 'ITB', name: 'Akademisi ITB (FTTM)', category: 'Akademisi', value: [50, 50, 60], detail: { peran: '6 (Riset Teknologi)' } },
-            { id: 'WRI', name: 'WRI Indonesia', category: 'Riset/NGO', value: [50, 50, 50], detail: { peran: '5 (Peta Jalan Dekarbonisasi)' } },
-            { id: 'SMI', name: 'PT Sarana Multi Infrastruktur', category: 'BUMN', value: [50, 50, 50], detail: { peran: '5 (Pendanaan Publik)' } },
-            { id: 'Asosiasi', name: 'Perhapi/IAGI/MGII', category: 'Profesi', value: [50, 50, 50], detail: { peran: '5 (Standarisasi Data)' } },
-            { id: 'TPPI', name: 'PT TPPI', category: 'BUMN', value: [50, 50, 70], detail: { peran: '7 (Hilirisasi Petrokimia)' } },
-            { id: 'Pemerintah RI', name: 'Pemerintah Republik Indonesia', category: 'Pemerintah', value: [50, 50, 100], detail: { peran: '10 (Pemegang Saham Mayoritas)' } },
-            { id: 'BPS', name: 'Badan Pusat Statistik', category: 'Pemerintah', value: [50, 50, 60], detail: { peran: '6 (Statistik Data Makro)' } },
-            { id: 'Kemenhan / TNI / BIN', name: 'Kemenhan / TNI / BIN', category: 'Pemerintah', value: [50, 50, 70], detail: { peran: '7 (Keamanan Strategis Nasional)' } },
-            { id: 'BPKP / KPK', name: 'BPKP / KPK', category: 'Pemerintah', value: [50, 50, 80], detail: { peran: '8 (Pengawasan Penegakan Hukum)' } },
-            { id: 'KLHK / ATR BPN', name: 'KLHK / ATR BPN', category: 'Pemerintah', value: [50, 50, 80], detail: { peran: '8 (Perizinan Lahan & Lingkungan)' } },
-            { id: 'Antam', name: 'PT Aneka Tambang Tbk', category: 'BUMN', value: [50, 50, 70], detail: { peran: '7 (Pengolahan Hilir Lanjutan)' } },
-            { id: 'BYD / CATL', name: 'BYD / CATL', category: 'Swasta', value: [50, 50, 70], detail: { peran: '7 (Manufaktur Baterai EV & Ekosistem)' } },
-            { id: 'Polytama', name: 'PT Polytama Propindo', category: 'Swasta', value: [50, 50, 60], detail: { peran: '6 (Produk Polimer Turunan)' } },
-            { id: 'PT KPI', name: 'PT Kilang Pertamina Internasional', category: 'BUMN', value: [50, 50, 80], detail: { peran: '8 (Integrasi Kilang)' } },
-            { id: 'UoP (USA)', name: 'UoP (Amerika Serikat)', category: 'Swasta', value: [50, 50, 70], detail: { peran: '7 (Penyedia Lisensi Teknologi)' } },
-            { id: 'Danantara', name: 'Badan Pengelola Investasi Danantara', category: 'Pemerintah', value: [50, 50, 80], detail: { peran: '8 (Koordinasi Strategis PSN)' } },
-            { id: 'Pemda / Bappeda', name: 'Pemda & Bappeda', category: 'Pemerintah', value: [50, 50, 70], detail: { peran: '7 (Penyelarasan Regulasi Daerah)' } }
-        ];
+        const initialLinks = [
+            { source: 'Kemenveshil', target: 'BPS', value: 5, lineType: 'dashed', type: 'Koordinasi Data: Harmonisasi metodologi statistik investasi' },
+            { source: 'Kemenveshil', target: 'BI', value: 5, lineType: 'dashed', type: 'Koordinasi Data: Sinkronisasi FDI' },
+            { source: 'Kemenveshil', target: 'Bappenas', value: 4, lineType: 'solid', type: 'Perencanaan Strategis: Dashboard monitoring' },
+            { source: 'Kemenveshil', target: 'Kemenperin', value: 4, lineType: 'dashed', type: 'Teknis Industri: Rekomendasi Tax Holiday' },
+            { source: 'Kemenveshil', target: 'Kemenkeu', value: 4, lineType: 'solid', type: 'Kebijakan Fiskal: Insentif progresif' },
+            { source: 'Kemenveshil', target: 'BIM', value: 4, lineType: 'dashed', type: 'Sistem Perizinan: Single Window' },
+            { source: 'Kemenveshil', target: 'ESDM', value: 4, lineType: 'dashed', type: 'Sinkronisasi Data Tambang/Hilir' },
+            { source: 'Kemenveshil', target: 'Kemendag', value: 3, lineType: 'dashed', type: 'Regulasi: Reformasi impor' },
+            { source: 'Kemenveshil', target: 'Lotte', value: 5, lineType: 'solid', type: 'Monitoring Proyek: Investasi Cilegon' },
+            { source: 'Kemenveshil', target: 'BYD / CATL', value: 4, lineType: 'solid', type: 'Fasilitasi Investasi: Ekosistem Baterai' },
+            { source: 'Bappenas', target: 'BIM', value: 5, lineType: 'solid', type: 'Instruksi & Anggaran: Integrasi RPJMN' },
+            { source: 'Bappenas', target: 'ESDM', value: 5, lineType: 'solid', type: 'Koordinasi Kebijakan: RKP 2027' },
+            { source: 'Bappenas', target: 'Kemenkeu', value: 4, lineType: 'solid', type: 'Sinkronisasi Anggaran: RAPBN' },
+            { source: 'Bappenas', target: 'WRI', value: 3, lineType: 'dashed', type: 'Kemitraan Riset: Nickel Roadmap' },
+            { source: 'BIM', target: 'ESDM', value: 4, lineType: 'solid', type: 'Validasi Data Cadangan' },
+            { source: 'BIM', target: 'BRIN', value: 4, lineType: 'solid', type: 'Orkestrasi Riset Tematik' },
+            { source: 'BIM', target: 'ITB', value: 3, lineType: 'dashed', type: 'Riset & Audit Teknis' },
+            { source: 'Kemenkeu', target: 'Pertamina', value: 4, lineType: 'solid', type: 'Kepemilikan Saham' },
+            { source: 'ESDM', target: 'MIND_ID', value: 3, lineType: 'solid', type: 'Pengawasan RKAB' },
+            { source: 'PLN', target: 'PTFI', value: 3, lineType: 'solid', type: 'Suplai Energi Hijau' },
+            { source: 'Pemerintah RI', target: 'PTFI', value: 5, lineType: 'solid', type: 'Saham: 51,24%' },
+            { source: 'Pertamina', target: 'TPPI', value: 5, lineType: 'solid', type: 'Saham Mayoritas 80%' },
+            { source: 'MIND_ID', target: 'BYD / CATL', value: 4, lineType: 'solid', type: 'Joint Venture Baterai EV' },
+            { source: 'TPPI', target: 'PT KPI', value: 4, lineType: 'solid', type: 'Integrasi Kilang' },
+            { source: 'Kemenkeu', target: 'BPKP / KPK', value: 4, lineType: 'solid', type: 'Join Audit Minerba' }
+        ];
 
-        // Data Relasi Inti (Links)
-        var stakeholderLinks = [
-            // Relasi Kemenveshil
-            { source: 'Kemenveshil', target: 'BPS', value: 5, lineType: 'dashed', type: 'Koordinasi Data: Harmonisasi metodologi statistik investasi (PMA/PMDN vs PMTB/PDB).' },
-            { source: 'Kemenveshil', target: 'BI', value: 5, lineType: 'dashed', type: 'Koordinasi Data: Sinkronisasi data realisasi investasi dengan data Foreign Direct Investment (FDI).' },
-            { source: 'Kemenveshil', target: 'Bappenas', value: 4, lineType: 'solid', type: 'Perencanaan Strategis: Penyusunan dashboard monitoring investasi dan identifikasi komoditas.' },
-            { source: 'Kemenveshil', target: 'Kemenperin', value: 4, lineType: 'dashed', type: 'Teknis Industri: Koordinasi pemberian rekomendasi teknis Tax Holiday dan pemetaan Missing Links.' },
-            { source: 'Kemenveshil', target: 'Kemenkeu', value: 4, lineType: 'solid', type: 'Kebijakan Fiskal: Implementasi insentif fiskal Tax Holiday progresif berbasis PCI.' },
-            { source: 'Kemenveshil', target: 'BIM', value: 4, lineType: 'dashed', type: 'Sistem Perizinan: Pembangunan mekanisme Single Window perizinan hilirisasi.' },
-            { source: 'Kemenveshil', target: 'ESDM', value: 4, lineType: 'dashed', type: 'Sinkronisasi Data: Sinkronisasi data fasilitas industri (tambang/smelter) & hilir.' },
-            { source: 'Kemenveshil', target: 'Kemendag', value: 3, lineType: 'dashed', type: 'Regulasi: Reformasi kebijakan impor bahan baku dan barang modal (EoDB).' },
-            { source: 'Kemenveshil', target: 'Pemda / Bappeda', value: 3, lineType: 'dashed', type: 'Regional: Penyelarasan iklim investasi pusat-daerah.' },
-            { source: 'Kemenveshil', target: 'Danantara', value: 3, lineType: 'dashed', type: 'Koordinasi PSN: Diskusi dukungan investasi pada 18 proyek strategis nasional.' },
-            { source: 'Kemenveshil', target: 'Lotte', value: 5, lineType: 'solid', type: 'Monitoring Proyek: Pengawalan investasi petrokimia Rp 59,37 triliun di Cilegon.' },
-            { source: 'Kemenveshil', target: 'BYD / CATL', value: 4, lineType: 'solid', type: 'Fasilitasi Investasi: Memfasilitasi realisasi investasi KBLBB/Baterai EV.' },
+        let nodes = [];
+        let links = [];
 
-            // Relasi Bappenas
-            { source: 'Bappenas', target: 'BIM', value: 5, lineType: 'solid', type: 'Instruksi & Anggaran: Mendefinisikan tusi, mengalokasikan anggaran, integrasi BIM ke RPJMN.' },
-            { source: 'Bappenas', target: 'ESDM', value: 5, lineType: 'solid', type: 'Koordinasi Kebijakan: Penyelarasan arah kebijakan dan prioritas RKP 2027 mineral migas.' },
-            { source: 'Bappenas', target: 'Kemenkeu', value: 4, lineType: 'solid', type: 'Sinkronisasi Anggaran: Integrasi perencanaan dengan penganggaran RAPBN & penetapan PSN.' },
-            { source: 'Bappenas', target: 'BI', value: 3, lineType: 'dashed', type: 'Pembiayaan: Diskusi forum PINISI memperkuat keterkaitan kebijakan pembiayaan.' },
-            { source: 'Bappenas', target: 'Kemenperin', value: 4, lineType: 'dashed', type: 'Strategi Industri: Sinergi kebijakan industrialisasi 2025-2045 dan pemetaan 17 komoditas.' },
-            { source: 'Bappenas', target: 'BPS', value: 3, lineType: 'dashed', type: 'Sinkronisasi Data: Koordinasi metodologi statistik definisi investasi PDB.' },
-            { source: 'Bappenas', target: 'WRI', value: 3, lineType: 'dashed', type: 'Kemitraan Riset: Kolaborasi penyusunan Nickel Decarbonization Roadmap.' },
-            { source: 'Bappenas', target: 'Pemda / Bappeda', value: 3, lineType: 'dashed', type: 'Koordinasi Regional: Musrenbangnas dan Rakortek kegiatan hilirisasi.' },
-            { source: 'Bappenas', target: 'Danantara', value: 3, lineType: 'dashed', type: 'Koordinasi PSN: Penyelarasan 18 proyek RIS-PPN strategis.' },
+        const initialDiskusiRecords = [
+            { tanggal: '27 Januari 2026', tempat: 'Ruang SS 3, Bappenas', pembicara: 'Bu Laksmi, Pak Eka Chandra, Pak Julian, Pak Yogi, Pak Agung, Pak Togu', lembaga: 'Kementerian PPN/Bappenas dan Badan Industri Mineral (BIM)', topik: 'Peran, Upaya, dan Arah BIM dalam Pengembangan Hilirisasi Mineral Strategis', hasil: 'BIM diposisikan sebagai koordinator dan orkestrator nasional untuk sinkronisasi kebijakan lintas K/L, integrasi database mineral nasional, reformasi riset tematik terpadu, serta penentuan komoditas prioritas mineral kritis.' },
+            { tanggal: '9 Desember 2025', tempat: 'PT Freeport Indonesia, Kawasan Ekonomi Gresik, JIIPE', pembicara: 'Tony Wenas', lembaga: 'PT Freeport Indonesia', topik: 'Peran Strategis Smelter PT Freeport Indonesia dalam Penguatan Hilirisasi dan Simbiosis Industri', hasil: 'Pentingnya hilirisasi tembaga untuk transisi energi; tantangan perizinan AMDAL, serapan produk turunan domestik, dan daya tarik investasi vs Vietnam.' },
+            { tanggal: '11 November 2025', tempat: 'TPPI Tuban, Jawa Timur', pembicara: 'Pak Bambang, Bapak Hendra', lembaga: 'PT TPPI (Pertamina)', topik: 'Diskusi Peran TPPI Pertamina dalam Hilirisasi Petrokimia', hasil: 'TPPI fokus produk aromatik dan olefin; tantangan pendanaan, perizinan, dan integrasi hulu-hilir serta proteksi pasar domestik.' },
+            { tanggal: '4 November 2025', tempat: 'Bappeda Jawa Barat', pembicara: 'Nurulhuda Halim, Nurcahyo Indro Basuki', lembaga: 'FTTM ITB (Akademisi)', topik: 'FGD Penguatan Ekosistem Hilirisasi Pertambangan, Metalurgi, dan Geologi', hasil: 'Perlu hulu data geologi, teknologi ekstraksi hijau, riset terapan, integrasi rantai pasok, dan persiapan SDM untuk produk high-value.' },
+            { tanggal: '2 Februari 2026', tempat: 'Ruang Papua, Menara Bappenas', pembicara: 'Direktur-direktur teknis terkait', lembaga: 'Kementerian ESDM dan Kementerian PPN/Bappenas', topik: 'Peran Perencanaan Pembangunan dalam Penguatan dan Pengembangan Hilirisasi Sektor Mineral', hasil: 'Pendekatan supply-driven ke demand-driven; skema pembiayaan smelter; moratorium smelter pirometalurgi nikel; integrasi rantai pasok.' },
+            { tanggal: '17 Desember 2025', tempat: 'Zoom', pembicara: 'Direktorat Sinergi dan Tata Kelola Perencanaan, Direktur Pengendalian IV, Direktorat Pembiayaan Strategis', lembaga: 'Kementerian PPN/Bappenas', topik: 'Finalisasi Timeline RKP 2027 dan Integrasi Proyek Strategis Nasional (PSN)', hasil: 'RKP 2027 dipercepat kick-off Februari; PSN diintegrasikan siklus RKP dengan pembaruan triwulanan.' },
+            { tanggal: '29 Oktober 2025', tempat: 'RR. Papua Lt 5, Menara Bappenas', pembicara: 'Tim Migas, Tim Industri, Tim Perdagangan, Tim Investasi, Dit. Pembangunan Wilayah', lembaga: 'Direktorat di Kementerian PPN/Bappenas', topik: 'Diskusi Teknis Pemetaan Bidang Hilirisasi di Wilayah dalam RKP 2027', hasil: 'Identifikasi 17-28 komoditas prioritas; mismatch pasokan-permintaan; kebutuhan infrastruktur gas Jawa-Sumatera; tantangan baterai nikel vs LFP.' },
+            { tanggal: '14 Januari 2026', tempat: 'Online', pembicara: 'Direktur PHKEI, Tim Bank Indonesia', lembaga: 'Bappenas dan Bank Indonesia', topik: 'Percepatan Intermediasi Nasional melalui PINISI 2026', hasil: 'PINISI menjadi platform pembiayaan proyek strategis hilirisasi padat modal via kebijakan makroprudensial BI.' },
+            { tanggal: '20 Februari 2026', tempat: 'Ruang Rapat Pontianak, Gedung Suhartoyo, Kementerian Investasi/BKPM', pembicara: 'Not in source', lembaga: 'Kementerian Investasi dan Hilirisasi/BKPM, BPS, Bank Indonesia', topik: 'Rapat Konsolidasi Data Sektor Realisasi Investasi Indonesia', hasil: 'Harmonisasi metodologi statistik investasi BKPM-BPS-BI dan arah investasi pada 17 komoditas prioritas untuk target ekonomi 8% 2029.' },
+            { tanggal: '5 Februari 2026', tempat: 'Ruang Bali, Menara Bappenas', pembicara: 'Not in source', lembaga: 'Kementerian PPN/Bappenas dan Kementerian ESDM', topik: 'Peran Perencanaan Pembangunan dalam Penguatan Hilirisasi Sektor Migas', hasil: 'Fokus RDMP/GRR, kompleksitas kilang petrokimia, substitusi LPG-DME, revisi ekspor LNG untuk jaminan pasokan domestik.' },
+            { tanggal: '1 Juli 2025', tempat: 'Not in source', pembicara: 'Tim Hilirisasi I, SDEMP Bappenas', lembaga: 'Kementerian PPN/Bappenas', topik: 'Koordinasi Pemahaman Proses Bisnis dan Strategi Hilirisasi Migas dan Minerba', hasil: 'Hilirisasi migas ke pasca-kilang petrokimia; kendala pasar China & teknologi baterai LFP; integrasi data cadangan antar lembaga.' },
+            { tanggal: '4 November 2025', tempat: 'Kantor PSDMBP (Badan Geologi)', pembicara: 'Not in source', lembaga: 'Badan Geologi (PSDMBP), Bappenas, Bappeda Jabar', topik: 'Klasifikasi Sumber Daya-Cadangan dan Ekosistem Pelaporan Mineral', hasil: 'PSDMBP fokus baseline geologi, cadangan terverifikasi IUP; usulkan pelaporan mineral ikutan lengkap ICP-MS.' },
+            { tanggal: 'Not in source', tempat: 'Not in source', pembicara: 'Togu Pardede, Egi Suarga, Leonardo A.A. Teguh Sambodo, Zahedi Zakaria, Binahidra Logiardi', lembaga: 'Bappenas, WRI Indonesia, Harita Group, MIND ID, PLN', topik: 'Peluncuran Peta Jalan Dekarbonisasi Industri Nikel', hasil: 'Visi nikel rendah karbon target -81% emisi 2045; transisi PLTU captive ke EBT, biofuel, efisiensi energi smelter untuk daya saing ESG.' }
+        ];
+        let diskusiRecords = [];
 
-            // Sisa Relasi Dasar
-            { source: 'BIM', target: 'ESDM', value: 4, lineType: 'solid', type: 'Validasi Data: BIM memvalidasi data cadangan dari laporan perusahaan tambang' },
-            { source: 'BIM', target: 'B Geologi', value: 3, lineType: 'dashed', type: 'Integrasi Data: BIM menggunakan data primer geologi sebagai basis validasi' },
-            { source: 'BIM', target: 'BRIN', value: 4, lineType: 'solid', type: 'Orkestrasi Riset: BIM merancang riset tematik yang dilaksanakan oleh BRIN' },
-            { source: 'BIM', target: 'ITB', value: 3, lineType: 'dashed', type: 'Riset & Audit: Pelibatan akademisi dalam proses due diligence teknis' },
-            { source: 'Kemenkeu', target: 'Pertamina', value: 4, lineType: 'solid', type: 'Kepemilikan: Kemenkeu sebagai pemegang saham dan pemberi izin restrukturisasi' },
-            { source: 'ESDM', target: 'MIND_ID', value: 3, lineType: 'solid', type: 'Pengawasan: ESDM menetapkan RKAB dan mengawasi smelter terintegrasi' },
-            { source: 'Kemenperin', target: 'Lotte', value: 4, lineType: 'solid', type: 'Fasilitasi Industri: Pendampingan proyek petrokimia dan pemberian insentif' },
-            { source: 'PLN', target: 'PTFI', value: 3, lineType: 'solid', type: 'Suplai Energi: PLN menyediakan daya listrik bersertifikat hijau untuk smelter' },
-            { source: 'BIM', target: 'Asosiasi', value: 3, lineType: 'dashed', type: 'Sertifikasi: Penggunaan tenaga ahli bersertifikat CPI/CPIS untuk penjaminan mutu data' },
-            { source: 'Pertamina', target: 'Lotte', value: 3, lineType: 'dashed', type: 'Sinergi Industri: Integrasi feed petrokimia di wilayah Tuban' },
-            
-            // Ekuitas & Finansial
-            { source: 'Kemenkeu', target: 'PTFI', value: 4, lineType: 'solid', type: 'Dividen & Pajak: Kontribusi pajak, royalti, dan dividen (bagi hasil 10% untuk negara)' },
-            { source: 'Pemerintah RI', target: 'PTFI', value: 5, lineType: 'solid', type: 'Saham: Kepemilikan saham pemerintah sebesar 51,24% di Freeport' },
-            { source: 'Pertamina', target: 'TPPI', value: 5, lineType: 'solid', type: 'Saham: Pertamina memegang 80,26% saham mayoritas di TPPI' },
-            { source: 'Kemenkeu', target: 'TPPI', value: 4, lineType: 'solid', type: 'Saham & Utang: Pemegang saham bersama Pertamina dan pemberi izin restrukturisasi' },
-            { source: 'SMI', target: 'Bappenas', value: 3, lineType: 'dashed', type: 'Blended Finance: Pendanaan sektor publik untuk dekarbonisasi dan proyek hilirisasi' },
-            
-            // Koordinasi Teknis & Regulasi
-            { source: 'ESDM', target: 'BIM', value: 4, lineType: 'dashed', type: 'Verifikasi Cadangan: BIM memvalidasi data RKAB' },
-            { source: 'BIM', target: 'Kemenhan / TNI / BIN', value: 3, lineType: 'dashed', type: 'Keamanan Strategis: Koordinasi ketersediaan mineral kritis untuk industri pertahanan' },
-            { source: 'Kemenkeu', target: 'BPKP / KPK', value: 4, lineType: 'solid', type: 'Join Audit: Pengawasan terpadu kepatuhan pelaku usaha Minerba dan akuntabilitas PNBP' },
-            { source: 'ESDM', target: 'Kemenperin', value: 3, lineType: 'dashed', type: 'Fragmentasi Smelter: Koordinasi pengawasan smelter' },
-            { source: 'ESDM', target: 'KLHK / ATR BPN', value: 3, lineType: 'dashed', type: 'Perizinan Wilayah: Dukungan izin lingkungan dan pengadaan lahan' },
-            
-            // Rantai Pasok
-            { source: 'PTFI', target: 'Antam', value: 3, lineType: 'solid', type: 'Simbiosis: Sebagian produk turunan tembaga dari Freeport dijual ke Antam' },
-            { source: 'MIND_ID', target: 'BYD / CATL', value: 4, lineType: 'solid', type: 'Joint Venture: Pengembangan pabrik baterai EV terintegrasi di Jawa Barat' },
-            { source: 'TPPI', target: 'Polytama', value: 3, lineType: 'solid', type: 'Kerjasama Hilir: TPPI bekerjasama dengan Polytama untuk produk turunan polimer' },
-            { source: 'TPPI', target: 'PT KPI', value: 4, lineType: 'solid', type: 'Integrasi Kilang: Sinergi kapasitas bisnis dengan Kilang Pertamina Internasional' },
-            
-            // R&D
-            { source: 'ITB', target: 'MIND_ID', value: 4, lineType: 'dashed', type: 'Riset Baterai: Kerjasama penyusunan pemrosesan bijih nikel menjadi baterai' },
-            { source: 'ITB', target: 'Kemenperin', value: 3, lineType: 'dashed', type: 'Kajian Strategis: ITB menyusun kajian khusus penguatan ekosistem hilirisasi' },
-            { source: 'TPPI', target: 'UoP (USA)', value: 3, lineType: 'solid', type: 'Lisensi Teknologi: Penggunaan penyedia teknologi dari AS untuk operasional kilang' }
-        ];
+        const catColors = {
+            'Pemerintah': '#e74c3c', 'BUMN': '#2ecc71', 'Swasta': '#3498db',
+            'Akademisi': '#9b59b6', 'Riset/NGO': '#1abc9c', 'Profesi': '#f1c40f'
+        };
 
-        document.addEventListener('DOMContentLoaded', function() {
-            initChart();
-            updateUI();
-        });
+        let chartMain, chartSum;
+        let lastFocusedElement = null;
+        let activeEntityId = '';
 
-        function getEChartsData() {
-            var chartDom = document.getElementById('tempat-diagram');
-            var w = chartDom ? chartDom.clientWidth : 800;
-            var h = chartDom ? chartDom.clientHeight : 650;
+        // --- CORE FUNCTIONS ---
+        window.onload = async function() {
+            await initPersistence();
+            initCharts();
+            updateUI();
+        };
 
-            let eNodes = stakeholderData.map(node => {
-                let color = categoryColors[node.category] || '#95a5a6';
+        async function initPersistence() {
+            const savedNodes = localStorage.getItem('hilir_pro_nodes');
+            const savedLinks = localStorage.getItem('hilir_pro_links');
+            const savedDiskusi = localStorage.getItem('hilir_pro_diskusi');
+            nodes = savedNodes ? JSON.parse(savedNodes) : [...initialNodes];
+            links = savedLinks ? JSON.parse(savedLinks) : [...initialLinks];
+            diskusiRecords = savedDiskusi ? JSON.parse(savedDiskusi) : [...initialDiskusiRecords];
+            normalizeDiskusiRecords();
+            if (!nodes.length) nodes = [...initialNodes];
+            if (!links.length) links = [...initialLinks];
+        }
 
-                let eNode = {
-                    id: node.id,
-                    name: node.name,
-                    value: node.value, 
-                    symbolSize: (node.value[2] / 1.5) + 15,
-                    itemStyle: { 
-                        color: color, 
-                        borderColor: '#fff', 
-                        borderWidth: 2, 
-                        shadowColor: 'rgba(0,0,0,0.15)',
-                        shadowBlur: 10
-                    },
-                    category: node.category,
-                    detail: node.detail
-                };
+        function saveData() {
+            localStorage.setItem('hilir_pro_nodes', JSON.stringify(nodes));
+            localStorage.setItem('hilir_pro_links', JSON.stringify(links));
+            localStorage.setItem('hilir_pro_diskusi', JSON.stringify(diskusiRecords));
+            showToast("💾 Perubahan disimpan");
+        }
 
-                // KUNCI BAPPENAS DI TENGAH (CENTER OF GRAVITY)
-                if (node.id === 'Bappenas') {
-                    eNode.x = w / 2;
-                    eNode.y = h / 2;
-                    eNode.fixed = true; 
-                    eNode.itemStyle.borderColor = '#FFD700'; 
-                    eNode.itemStyle.borderWidth = 5;
-                }
+        function initCharts() {
+            chartMain = echarts.init(document.getElementById('network-chart'));
+            chartSum = echarts.init(document.getElementById('summary-chart'));
+            window.addEventListener('resize', () => { chartMain.resize(); chartSum.resize(); });
+            chartMain.on('click', (params) => {
+                if (params.dataType === 'node' && params.data && params.data.id) {
+                    openEntityInsight(params.data.id);
+                }
+            });
+        }
 
-                return eNode;
-            });
+        function updateUI() {
+            renderMainChart();
+            renderSummaryChart();
+            renderTable();
+            renderNotulensi();
+            renderDiskusi();
+        }
 
-            // Set kategori untuk keperluan legend
-            let eCategories = Object.keys(categoryColors).map(key => ({ 
-                name: key, 
-                itemStyle: {
-                    color: categoryColors[key]
-                } 
-            }));
+        function renderMainChart() {
+            const repulsion = parseInt(document.getElementById('repulsion-slider').value);
+            const seriesData = nodes.map(n => ({
+                id: n.id, name: n.name,
+                symbolSize: (n.value[2] / 2) + 12,
+                category: n.category,
+                itemStyle: { 
+                    color: catColors[n.category],
+                    opacity: 0.3 + (n.value[1] / 100 * 0.7), // Opacity by Engagement (Y)
+                    borderColor: '#fff', borderWidth: 1
+                },
+                peran: n.peran
+            }));
 
-            return { nodes: eNodes, links: stakeholderLinks, categories: eCategories };
-        }
+            const option = {
+                tooltip: { formatter: (p) => p.dataType === 'node' ? `<b>${p.name}</b><br/>Peran: ${p.data.peran || '-'}` : `<b>${p.data.source} ↔ ${p.data.target}</b><br/>${p.data.type || '-'}` },
+                series: [{
+                    type: 'graph', layout: 'force',
+                    data: seriesData, links: links,
+                    categories: Object.keys(catColors).map(c => ({ name: c })),
+                    roam: true, draggable: true,
+                    emphasis: { focus: 'adjacency', lineStyle: { width: 6, opacity: 1 } },
+                    force: { repulsion: repulsion, edgeLength: 160, gravity: 0.1 },
+                    label: { show: true, position: 'right', fontSize: 10, fontWeight: '600' },
+                    lineStyle: { curveness: 0.2, color: 'source', opacity: 0.4 }
+                }]
+            };
 
-        function initChart() {
-            var kanvas = document.getElementById('tempat-diagram');
-            if (!kanvas || typeof echarts === 'undefined') return;
-            
-            grafik = echarts.init(kanvas);
-            renderChart();
+            option.series[0].links.forEach(l => {
+                l.lineStyle = { type: l.lineType || 'solid', width: l.value / 1.5 };
+            });
 
-            window.addEventListener('resize', () => {
-                if (grafik) {
-                    grafik.resize();
-                    renderChart(); 
-                }
-            });
-        }
+            chartMain.setOption(option);
+        }
 
-        function renderChart() {
-            let chartData = getEChartsData();
+        function renderSummaryChart() {
+            const stats = nodes.reduce((acc, curr) => { acc[curr.category] = (acc[curr.category] || 0) + 1; return acc; }, {});
+            chartSum.setOption({
+                series: [{
+                    type: 'pie', radius: ['40%', '75%'], avoidLabelOverlap: false,
+                    itemStyle: { borderRadius: 8 }, label: { show: false },
+                    data: Object.entries(stats).map(([name, value]) => ({ name, value, itemStyle: { color: catColors[name] } }))
+                }],
+                tooltip: { trigger: 'item' },
+                legend: { bottom: 0, textStyle: { fontSize: 10, fontWeight: '600' } }
+            });
+        }
 
-            let option = {
-                tooltip: {
-                    formatter: function(params) {
-                        if (params.dataType === 'node') {
-                            var d = params.data.detail || {};
-                            return `<div style="font-family:sans-serif; max-width:320px; white-space:normal;">
-                                    <div style="font-weight:bold;font-size:15px;border-bottom:1px solid #ddd;padding-bottom:5px;margin-bottom:8px;color:${params.color}">
-                                        ${params.name} <span style="font-size:11px; color:#999;">(${params.data.id})</span>
-                                    </div>
-                                    <div style="font-size:13px; line-height:1.5;">
-                                        <div style="margin-bottom:6px;"><b>Kategori:</b> ${params.data.category}</div>
-                                        <div style="margin-bottom:6px;"><b>Peran & Bobot:</b> <br/><span style="color:#e67e22; font-weight:bold;">${d.peran || '-'}</span></div>
-                                    </div></div>`;
-                        } else if (params.dataType === 'edge') {
-                            return `<div style="max-width:280px; white-space:normal;">
-                                        <b>${params.data.source} ↔ ${params.data.target}</b><br/>
-                                        <div style="margin-top:6px; font-size:12px;"><b>Deskripsi Relasi:</b><br/>${params.data.type}</div>
-                                        <div style="margin-top:4px; font-size:11px; color:#999;">Tipe: ${params.data.lineType === 'dashed' ? 'Koordinasi/Informal' : 'Hubungan Solid/Kuat'}</div>
-                                    </div>`;
-                        }
-                    }
-                },
-                legend: {
-                    data: chartData.categories.map(c => c.name),
-                    bottom: 10,
-                    textStyle: { color: '#555', fontWeight: 'bold' }
-                },
-                series: [{
-                    type: 'graph',
-                    layout: 'force',
-                    data: chartData.nodes,
-                    links: chartData.links,
-                    categories: chartData.categories,
-                    roam: true, 
-                    draggable: true, 
-                    force: {
-                        repulsion: 500,    
-                        edgeLength: 150,   
-                        gravity: 0.1       
-                    },
-                    label: {
-                        show: true,
-                        position: 'right',
-                        formatter: '{b}',
-                        fontSize: 12,
-                        color: '#333',
-                        textBorderColor: '#fff',
-                        textBorderWidth: 2,
-                        fontWeight: 'bold'
-                    },
-                    lineStyle: {
-                        color: 'source', 
-                        curveness: 0.15,  
-                        opacity: 0.7
-                    },
-                    emphasis: {
-                        focus: 'adjacency', 
-                        lineStyle: { width: 5, opacity: 1 }
-                    }
-                }]
-            };
+        function updateVisuals() { renderMainChart(); }
 
-            // Mengaplikasikan Sifat Garis (Solid / Dashed)
-            option.series[0].links.forEach(link => {
-                link.lineStyle = { 
-                    width: link.value, 
-                    curveness: 0.15,
-                    type: link.lineType || 'solid'
-                };
-            });
+        // --- CRUD LOGIC ---
+        function switchTab(id, triggerBtn) {
+            document.querySelectorAll('.tab-content').forEach(el => el.classList.remove('active'));
+            document.querySelectorAll('.tab-button').forEach((btn) => {
+                btn.classList.remove('active');
+                btn.setAttribute('aria-selected', 'false');
+                btn.setAttribute('tabindex', '-1');
+            });
+            document.getElementById(id).classList.add('active');
+            const activeBtn = triggerBtn || document.querySelector(`.tab-button[data-tab="${id}"]`);
+            if (activeBtn) {
+                activeBtn.classList.add('active');
+                activeBtn.setAttribute('aria-selected', 'true');
+                activeBtn.setAttribute('tabindex', '0');
+            }
+            if(id === 'mapping') setTimeout(() => { chartMain.resize(); chartSum.resize(); }, 150);
+        }
 
-            grafik.setOption(option);
-        }
+        function openModal(id) {
+            const modal = document.getElementById(id);
+            lastFocusedElement = document.activeElement;
+            modal.classList.add('show');
+            modal.setAttribute('aria-hidden', 'false');
+            if(id === 'modal-relation') populateRelSelects();
+            const focusable = modal.querySelector('input, select, textarea, button, [tabindex]:not([tabindex="-1"])');
+            if (focusable) focusable.focus();
+        }
 
-        // ===== TAB & MODAL LOGIC =====
-        function switchTab(tabId) {
-            document.querySelectorAll('.tab-content, .tab-button').forEach(el => el.classList.remove('active'));
-            document.getElementById(tabId).classList.add('active');
-            event.target.classList.add('active');
-            if (tabId === 'mapping' && grafik) setTimeout(() => grafik.resize(), 100);
-        }
+        function closeModal(id) {
+            const modal = document.getElementById(id);
+            modal.classList.remove('show');
+            modal.setAttribute('aria-hidden', 'true');
+            if (id === 'modal-confirm') {
+                document.getElementById('confirm-title').innerText = "Konfirmasi Hapus";
+                document.getElementById('confirm-msg').innerText = "";
+            }
+            if (lastFocusedElement && typeof lastFocusedElement.focus === 'function') lastFocusedElement.focus();
+        }
 
-        function toggleForm(modalId) { document.getElementById(modalId).classList.add('show'); }
-        function closeForm(modalId) { 
-            document.getElementById(modalId).classList.remove('show'); 
-            if(modalId === 'addStakeholderModal') document.getElementById('stakeholderForm').reset();
-        }
+        function normalizeDiskusiRecords() {
+            diskusiRecords = diskusiRecords.map((record) => {
+                const normalized = { ...record };
+                if (!Array.isArray(normalized.entityIds)) {
+                    normalized.entityIds = inferEntityIdsFromRecord(normalized);
+                }
+                return normalized;
+            });
+        }
 
-        // ===== CRUD STAKEHOLDER =====
-        function saveStakeholder(e) {
-            e.preventDefault();
-            let idx = parseInt(document.getElementById('editIndex').value);
-            
-            let data = {
-                id: document.getElementById('inputId').value.trim() || document.getElementById('inputNama').value.trim(),
-                name: document.getElementById('inputNama').value.trim(),
-                category: document.getElementById('inputKategori').value,
-                value: [
-                    Number(document.getElementById('inputX').value),
-                    Number(document.getElementById('inputY').value),
-                    Number(document.getElementById('inputZ').value)
-                ],
-                detail: {
-                    peran: document.getElementById('inputPeran').value.trim()
-                }
-            };
+        function inferEntityIdsFromRecord(record) {
+            const text = `${record.lembaga || ''} ${record.topik || ''} ${record.hasil || ''}`.toLowerCase();
+            return nodes
+                .filter((node) => {
+                    const idHit = text.includes((node.id || '').toLowerCase());
+                    const nameHit = text.includes((node.name || '').toLowerCase());
+                    return idHit || nameHit;
+                })
+                .map((node) => node.id);
+        }
 
-            if (idx === -1) { 
-                stakeholderData.push(data);
-            } else { 
-                let oldId = stakeholderData[idx].id;
-                stakeholderData[idx] = data;
-                
-                if (oldId !== data.id) {
-                    stakeholderLinks.forEach(link => {
-                        if (link.source === oldId) link.source = data.id;
-                        if (link.target === oldId) link.target = data.id;
-                    });
-                }
-            }
+        function syncEntityIdAcrossTabs(oldId, newId) {
+            links = links.map((link) => ({
+                ...link,
+                source: link.source === oldId ? newId : link.source,
+                target: link.target === oldId ? newId : link.target
+            }));
+            diskusiRecords = diskusiRecords.map((record) => ({
+                ...record,
+                entityIds: (record.entityIds || []).map((entityId) => entityId === oldId ? newId : entityId)
+            }));
+        }
 
-            closeForm('addStakeholderModal');
-            updateUI();
-        }
+        function saveStakeholder(e) {
+            e.preventDefault();
+            const idx = parseInt(document.getElementById('edit-idx').value);
+            const newId = document.getElementById('in-id').value.trim();
+            if (!newId) return showToast("⚠️ ID entitas wajib diisi", "error");
 
-        function openEditModal(idx) {
-            let item = stakeholderData[idx];
-            document.getElementById('formTitle').innerText = '✏️ Edit Stakeholder';
-            document.getElementById('editIndex').value = idx;
-            document.getElementById('inputId').value = item.id;
-            document.getElementById('inputNama').value = item.name;
-            document.getElementById('inputKategori').value = item.category;
-            document.getElementById('inputPeran').value = item.detail.peran || '';
-            document.getElementById('inputX').value = item.value[0];
-            document.getElementById('inputY').value = item.value[1];
-            document.getElementById('inputZ').value = item.value[2];
-            
-            toggleForm('addStakeholderModal');
-        }
+            const duplicateIdx = nodes.findIndex((n, i) => n.id === newId && i !== idx);
+            if (duplicateIdx > -1) return showToast("⚠️ ID sudah dipakai entitas lain", "error");
 
-        function deleteStakeholder(idx) {
-            if (confirm(`Hapus lembaga ${stakeholderData[idx].name}?`)) {
-                let idToRemove = stakeholderData[idx].id;
-                stakeholderData.splice(idx, 1);
-                stakeholderLinks = stakeholderLinks.filter(l => l.source !== idToRemove && l.target !== idToRemove);
-                updateUI();
-            }
-        }
+            const oldId = idx > -1 ? nodes[idx].id : '';
+            const data = {
+                id: newId,
+                name: document.getElementById('in-name').value,
+                category: document.getElementById('in-cat').value,
+                peran: document.getElementById('in-peran').value,
+                value: [parseInt(document.getElementById('in-x').value), parseInt(document.getElementById('in-y').value), parseInt(document.getElementById('in-z').value)],
+                contact: idx > -1 ? nodes[idx].contact : '',
+                office: idx > -1 ? nodes[idx].office : '',
+                notes: idx > -1 ? nodes[idx].notes : []
+            };
+            if(idx > -1) {
+                nodes[idx] = data;
+                if (oldId && oldId !== newId) syncEntityIdAcrossTabs(oldId, newId);
+            } else {
+                nodes.push(data);
+            }
+            saveData();
+            closeModal('modal-stakeholder');
+            updateUI();
+        }
 
-        // ===== CRUD RELATION =====
-        function openRelationModal() {
-            let src = document.getElementById('sourceStakeholder');
-            let tgt = document.getElementById('targetStakeholder');
-            src.innerHTML = tgt.innerHTML = '<option value="">Pilih Lembaga (Gunakan ID)...</option>';
-            
-            stakeholderData.forEach(item => {
-                src.add(new Option(`${item.name} (${item.id})`, item.id));
-                tgt.add(new Option(`${item.name} (${item.id})`, item.id));
-            });
-        }
+        function editNode(idx) {
+            const n = nodes[idx];
+            document.getElementById('edit-idx').value = idx;
+            document.getElementById('in-id').value = n.id;
+            document.getElementById('in-name').value = n.name;
+            document.getElementById('in-cat').value = n.category;
+            document.getElementById('in-peran').value = n.peran || '';
+            document.getElementById('in-x').value = n.value[0];
+            document.getElementById('in-y').value = n.value[1];
+            document.getElementById('in-z').value = n.value[2];
+            document.getElementById('modal-title').innerText = "Edit Stakeholder";
+            openModal('modal-stakeholder');
+        }
 
-        function saveRelation(e) {
-            e.preventDefault();
-            let src = document.getElementById('sourceStakeholder').value;
-            let tgt = document.getElementById('targetStakeholder').value;
-            if (src === tgt) return alert('Lembaga sumber dan target tidak boleh sama!');
+        function prepareNewStakeholder() {
+            document.getElementById('edit-idx').value = -1;
+            document.getElementById('in-id').value = '';
+            document.getElementById('in-name').value = '';
+            document.getElementById('in-cat').value = 'Pemerintah';
+            document.getElementById('in-peran').value = '';
+            document.getElementById('in-x').value = 50;
+            document.getElementById('in-y').value = 50;
+            document.getElementById('in-z').value = 70;
+            document.getElementById('modal-title').innerText = "Data Stakeholder";
+            openModal('modal-stakeholder');
+        }
 
-            let linkData = {
-                source: src,
-                target: tgt,
-                type: document.getElementById('relationType').value,
-                lineType: document.getElementById('relationLineType').value,
-                value: Number(document.getElementById('relationStrength').value)
-            };
+        function deleteNode(idx) {
+            const node = nodes[idx];
+            openModal('modal-confirm');
+            document.getElementById('confirm-title').innerText = "Konfirmasi Hapus";
+            document.getElementById('confirm-msg').innerText = `Hapus ${node.name} (${node.id})?`;
+            document.getElementById('confirm-yes').onclick = () => {
+                const id = nodes[idx].id;
+                nodes.splice(idx, 1);
+                links = links.filter(l => l.source !== id && l.target !== id);
+                diskusiRecords = diskusiRecords.map((record) => ({
+                    ...record,
+                    entityIds: (record.entityIds || []).filter((entityId) => entityId !== id)
+                }));
+                saveData();
+                closeModal('modal-confirm');
+                updateUI();
+                showToast("🗑️ Stakeholder dihapus");
+            };
+        }
 
-            let existingIdx = stakeholderLinks.findIndex(l => (l.source === src && l.target === tgt) || (l.source === tgt && l.target === src));
-            if (existingIdx > -1) stakeholderLinks[existingIdx] = linkData;
-            else stakeholderLinks.push(linkData);
+        function saveRelation(e) {
+            e.preventDefault();
+            const src = document.getElementById('rel-src').value;
+            const tgt = document.getElementById('rel-tgt').value;
+            if(src === tgt) return showToast("⚠️ Error: Sumber & target sama", "error");
+            const payload = { source: src, target: tgt, type: document.getElementById('rel-desc').value, lineType: document.getElementById('rel-type').value, value: 3 };
+            links.push(payload);
+            saveData();
+            closeModal('modal-relation');
+            updateUI();
+        }
 
-            closeForm('relationModal');
-            updateUI();
-        }
+        function removeRelation(linkIdx, focusEntityId = '') {
+            const relation = links[linkIdx];
+            if (!relation) return;
+            links.splice(linkIdx, 1);
+            saveData();
+            updateUI();
+            showToast("🗑️ Relasi dihapus");
+            if (focusEntityId) openEntityInsight(focusEntityId);
+        }
 
-        function deleteRelation(idx) {
-            if (confirm('Hapus relasi ini?')) {
-                stakeholderLinks.splice(idx, 1);
-                updateUI();
-            }
-        }
+        // --- TABLES ---
+        function renderTable() {
+            const query = document.getElementById('search-db').value.toLowerCase();
+            const filtered = nodes.filter(n => n.name.toLowerCase().includes(query) || n.id.toLowerCase().includes(query));
+            document.getElementById('db-count').innerText = `${filtered.length} dari ${nodes.length} stakeholder tampil`;
+            if (!filtered.length) {
+                document.getElementById('table-body').innerHTML = `
+                    <tr>
+                        <td colspan="6" style="text-align:center; color:#64748b;">Tidak ada data yang cocok dengan pencarian.</td>
+                    </tr>`;
+                return;
+            }
+            document.getElementById('table-body').innerHTML = filtered.map(n => `
+                <tr>
+                    <td><b>${n.id}</b></td>
+                    <td>${n.name}</td>
+                    <td><span class="badge" style="background:${catColors[n.category]}">${n.category}</span></td>
+                    <td>${n.peran || '-'}</td>
+                    <td>${n.value[2]}</td>
+                    <td>
+                        <button class="btn btn-ghost" onclick="editNode(${nodes.indexOf(n)})">Edit</button>
+                        <button class="btn btn-ghost" style="color:red" onclick="deleteNode(${nodes.indexOf(n)})">Hapus</button>
+                    </td>
+                </tr>`).join('');
+        }
 
-        // ===== UI UPDATES =====
-        document.getElementById('relationModal').addEventListener('click', function(e) {
-            if (this === e.target) closeForm('relationModal');
-        });
-        document.getElementById('addStakeholderModal').addEventListener('click', function(e) {
-            if (this === e.target) closeForm('addStakeholderModal');
-        });
-        document.querySelector('button[onclick="toggleForm(\'relationModal\')"]').addEventListener('click', openRelationModal);
+        function renderNotulensi() {
+            const query = document.getElementById('search-not').value.toLowerCase();
+            const filtered = nodes.filter(n => n.name.toLowerCase().includes(query) || (n.contact || '').toLowerCase().includes(query));
+            document.getElementById('not-count').innerText = `${filtered.length} dari ${nodes.length} lembaga tampil`;
+            if (!filtered.length) {
+                document.getElementById('notulensi-body').innerHTML = `
+                    <tr>
+                        <td colspan="5" style="text-align:center; color:#64748b;">Tidak ada kontak/notulensi yang cocok.</td>
+                    </tr>`;
+                return;
+            }
+            document.getElementById('notulensi-body').innerHTML = filtered.map(n => `
+                <tr>
+                    <td><b>${n.name}</b></td>
+                    <td>${n.contact || '-'}</td>
+                    <td>${n.office || '-'}</td>
+                    <td>${(n.notes || []).length ? (n.notes.map(l => `<a href="${l}" target="_blank" rel="noopener noreferrer" style="display:block;font-size:11px">📎 Notulensi</a>`).join('')) : '<i>Kosong</i>'}</td>
+                    <td><button class="btn btn-ghost" onclick="openQuickNotulensi('${n.id}')">📝 Update</button></td>
+                </tr>`).join('');
+        }
 
-        function updateUI() {
-            renderChart();
-            
-            document.getElementById('stat-total').innerText = stakeholderData.length;
-            document.getElementById('stat-relasi').innerText = stakeholderLinks.length;
-            
-            let linkCount = {};
-            stakeholderLinks.forEach(l => {
-                linkCount[l.source] = (linkCount[l.source] || 0) + 1;
-                linkCount[l.target] = (linkCount[l.target] || 0) + 1;
-            });
-            let topNodeId = Object.keys(linkCount).reduce((a, b) => linkCount[a] > linkCount[b] ? a : b, '-');
-            let topNodeObj = stakeholderData.find(s => s.id === topNodeId);
-            document.getElementById('stat-pusat').innerText = topNodeObj ? topNodeObj.id : topNodeId;
+        function renderDiskusi() {
+            if (!diskusiRecords.length) {
+                document.getElementById('diskusi-body').innerHTML = `
+                    <tr>
+                        <td colspan="8" style="text-align:center; color:#64748b;">Belum ada catatan diskusi.</td>
+                    </tr>`;
+                return;
+            }
+            document.getElementById('diskusi-body').innerHTML = diskusiRecords.map((d, idx) => `
+                <tr>
+                    <td>${d.tanggal}</td>
+                    <td>${d.tempat}</td>
+                    <td>${d.pembicara}</td>
+                    <td>${d.lembaga}</td>
+                    <td>${(d.entityIds || []).length ? d.entityIds.join(', ') : '-'}</td>
+                    <td>${d.topik}</td>
+                    <td>${d.hasil}</td>
+                    <td>
+                        <button class="btn btn-ghost" onclick="openDiskusiModal(${idx})">Edit</button>
+                        <button class="btn btn-ghost" style="color:red;" onclick="deleteDiskusiRecord(${idx})">Hapus</button>
+                    </td>
+                </tr>`).join('');
+        }
 
-            let tbData = document.getElementById('tabel-data');
-            tbData.innerHTML = stakeholderData.map((d, i) => `
-                <tr>
-                    <td><strong>${d.id}</strong></td>
-                    <td>${d.name}</td>
-                    <td><span style="display:inline-block; padding:3px 10px; border-radius:12px; font-size:11px; color:#fff; font-weight:bold; background:${categoryColors[d.category]}">${d.category}</span></td>
-                    <td>${d.detail.peran || '-'}</td>
-                    <td>${d.value[2]} (Size)</td>
-                    <td>
-                        <button class="btn-table-edit" onclick="openEditModal(${i})">Edit</button>
-                        <button class="btn-table-delete" onclick="deleteStakeholder(${i})">Hapus</button>
-                    </td>
-                </tr>`).join('');
+        function openDiskusiModal(idx = -1, presetEntityId = '') {
+            const rec = idx > -1 ? diskusiRecords[idx] : null;
+            document.getElementById('diskusi-edit-idx').value = idx;
+            document.getElementById('diskusi-tanggal').value = rec ? rec.tanggal : '';
+            document.getElementById('diskusi-tempat').value = rec ? rec.tempat : '';
+            document.getElementById('diskusi-pembicara').value = rec ? rec.pembicara : '';
+            document.getElementById('diskusi-lembaga').value = rec ? rec.lembaga : '';
+            document.getElementById('diskusi-topik').value = rec ? rec.topik : '';
+            document.getElementById('diskusi-hasil').value = rec ? rec.hasil : '';
+            document.getElementById('diskusi-entity-ids').value = rec
+                ? (rec.entityIds || []).join(', ')
+                : (presetEntityId || '');
+            openModal('modal-diskusi');
+        }
 
-            let tbRel = document.getElementById('tabel-relasi');
-            tbRel.innerHTML = stakeholderLinks.map((l, i) => `
-                <tr>
-                    <td>${i+1}</td>
-                    <td><strong>${l.source}</strong></td>
-                    <td><strong>${l.target}</strong></td>
-                    <td><span style="padding:2px 6px; border-radius:4px; font-size:11px; background:#f1f5f9;">${l.lineType === 'dashed' ? 'Putus-putus' : 'Solid'}</span></td>
-                    <td>${l.type}</td>
-                    <td><button class="btn-table-delete" onclick="deleteRelation(${i})">Hapus</button></td>
-                </tr>`).join('');
-        }
+        function saveDiskusiRecord(e) {
+            e.preventDefault();
+            const idx = parseInt(document.getElementById('diskusi-edit-idx').value);
+            const entityIdsRaw = document.getElementById('diskusi-entity-ids').value;
+            const parsedEntityIds = entityIdsRaw
+                .split(',')
+                .map((v) => v.trim())
+                .filter(Boolean);
+            const validEntityIds = parsedEntityIds.filter((id) => nodes.some((node) => node.id === id));
 
-        // ===== EXPORT EXCEL (CSV) KHUSUS FORMAT INDONESIA =====
-        function exportToExcel() {
-            // Menggunakan ";" sebagai pembatas antarkolom
-            // Menggunakan "," untuk angka desimal
-            // Format ini sangat disesuaikan dengan Regional Settings Excel Indonesia.
-            let csv = "\ufeffKode ID;Nama Lembaga;Kategori;Posisi / Bobot;Sikap (X);Keterlibatan (Y);Pengaruh (Z)\n";
-            stakeholderData.forEach((d) => {
-                let x = d.value[0].toString().replace('.', ',');
-                let y = d.value[1].toString().replace('.', ',');
-                let z = d.value[2].toString().replace('.', ',');
-                
-                let peran = d.detail.peran ? d.detail.peran.replace(/"/g, '""') : '-';
-                
-                csv += `"${d.id}";"${d.name}";"${d.category}";"${peran}";${x};${y};${z}\n`;
-            });
+            const payload = {
+                tanggal: document.getElementById('diskusi-tanggal').value.trim(),
+                tempat: document.getElementById('diskusi-tempat').value.trim(),
+                pembicara: document.getElementById('diskusi-pembicara').value.trim(),
+                lembaga: document.getElementById('diskusi-lembaga').value.trim(),
+                entityIds: [...new Set(validEntityIds)],
+                topik: document.getElementById('diskusi-topik').value.trim(),
+                hasil: document.getElementById('diskusi-hasil').value.trim()
+            };
 
-            // Menyisipkan Baris Kosong Pemisah
-            csv += "\n\n\ufeffSimpul A;Simpul B;Intensitas Garis;Tipe Garis;Deskripsi Relasi\n";
-            stakeholderLinks.forEach(l => {
-                let typeStr = l.type ? l.type.replace(/"/g, '""') : '-';
-                csv += `"${l.source}";"${l.target}";${l.value};"${l.lineType}";"${typeStr}"\n`;
-            });
+            if (parsedEntityIds.length && !validEntityIds.length) {
+                return showToast("⚠️ ID entitas tidak ditemukan di database", "error");
+            }
 
-            let blob = new Blob([csv], { type: 'text/csv;charset=utf-8;' });
-            let link = document.createElement('a');
-            link.href = URL.createObjectURL(blob);
-            link.download = `Peta_Hilirisasi_ID_${new Date().toISOString().split('T')[0]}.csv`;
-            link.click();
-        }
-    </script>
+            if (idx > -1) {
+                diskusiRecords[idx] = { ...diskusiRecords[idx], ...payload };
+            } else {
+                diskusiRecords.unshift(payload);
+            }
+
+            saveData();
+            closeModal('modal-diskusi');
+            updateUI();
+            showToast("✅ Catatan diskusi disimpan");
+        }
+
+        function deleteDiskusiRecord(idx) {
+            const rec = diskusiRecords[idx];
+            openModal('modal-confirm');
+            document.getElementById('confirm-title').innerText = "Konfirmasi Hapus Catatan";
+            document.getElementById('confirm-msg').innerText = `Hapus catatan diskusi: "${rec.topik}"?`;
+            document.getElementById('confirm-yes').onclick = () => {
+                diskusiRecords.splice(idx, 1);
+                saveData();
+                closeModal('modal-confirm');
+                document.getElementById('confirm-title').innerText = "Konfirmasi Hapus";
+                updateUI();
+                showToast("🗑️ Catatan diskusi dihapus");
+            };
+        }
+
+        function openEntityInsight(entityId) {
+            const entity = nodes.find((n) => n.id === entityId);
+            if (!entity) return;
+            activeEntityId = entityId;
+            const relatedLinks = links
+                .map((l, idx) => ({ ...l, _idx: idx }))
+                .filter((l) => l.source === entityId || l.target === entityId);
+            const relatedDiskusi = diskusiRecords.filter((d) => (d.entityIds || []).includes(entityId));
+            const notes = (entity.notes || []).map((link) =>
+                `<a href="${link}" target="_blank" rel="noopener noreferrer" style="display:block; font-size:12px;">📎 ${link}</a>`).join('');
+            const relations = relatedLinks.map((l) => {
+                const counterpart = l.source === entityId ? l.target : l.source;
+                return `<li style="margin-bottom:6px;">${counterpart} - ${l.type || '-'} <button class="btn btn-ghost" style="padding:4px 8px; font-size:11px;" onclick="removeRelation(${l._idx}, '${entity.id}')">Hapus</button></li>`;
+            }).join('');
+            const diskusiHtml = relatedDiskusi.map((d) =>
+                `<li style="margin-bottom:8px;"><b>${d.tanggal}</b>: ${d.topik}</li>`).join('');
+
+            document.getElementById('modal-entity-title').innerText = `📌 Ringkasan Entitas: ${entity.name} (${entity.id})`;
+            document.getElementById('entity-insight-body').innerHTML = `
+                <div style="display:grid; grid-template-columns: 1fr 1fr; gap:16px;">
+                    <div class="card" style="margin:0;">
+                        <h4 style="margin-bottom:10px;">Profil Inti</h4>
+                        <p><b>Kategori:</b> ${entity.category}</p>
+                        <p><b>Peran:</b> ${entity.peran || '-'}</p>
+                        <p><b>Sikap / Terlibat / Dampak:</b> ${entity.value.join(' / ')}</p>
+                        <div style="display:flex; gap:8px; margin-top:12px;">
+                            <button class="btn btn-primary" onclick="closeModal('modal-entity'); editNode(${nodes.indexOf(entity)});">Edit Profil</button>
+                            <button class="btn btn-ghost" onclick="closeModal('modal-entity'); openQuickNotulensi('${entity.id}');">Edit Kontak</button>
+                        </div>
+                    </div>
+                    <div class="card" style="margin:0;">
+                        <h4 style="margin-bottom:10px;">Kontak & Notulensi</h4>
+                        <p><b>PIC:</b> ${entity.contact || '-'}</p>
+                        <p><b>Kantor:</b> ${entity.office || '-'}</p>
+                        <div style="margin-top:8px;">${notes || '<i>Belum ada link notulensi</i>'}</div>
+                    </div>
+                    <div class="card" style="margin:0;">
+                        <h4 style="margin-bottom:10px;">Relasi Kerja (${relatedLinks.length})</h4>
+                        <ul style="padding-left:18px;">${relations || '<li>Tidak ada relasi</li>'}</ul>
+                    </div>
+                    <div class="card" style="margin:0;">
+                        <h4 style="margin-bottom:10px;">Riwayat Diskusi (${relatedDiskusi.length})</h4>
+                        <ul style="padding-left:18px;">${diskusiHtml || '<li>Belum ada diskusi tertaut</li>'}</ul>
+                        <button class="btn btn-success" style="margin-top:10px;" onclick="closeModal('modal-entity'); openDiskusiModal(-1, '${entity.id}');">+ Tautkan Catatan Diskusi</button>
+                    </div>
+                </div>`;
+            openModal('modal-entity');
+        }
+
+        function openQuickNotulensi(id) {
+            const node = nodes.find(n => n.id === id);
+            if (!node) return;
+            document.getElementById('quick-note-id').value = node.id;
+            document.getElementById('quick-note-name').value = node.name;
+            document.getElementById('quick-note-contact').value = node.contact || '';
+            document.getElementById('quick-note-office').value = node.office || '';
+            document.getElementById('quick-note-links').value = (node.notes || []).join('\n');
+            openModal('modal-notulensi');
+        }
+
+        function saveQuickNotulensi(e) {
+            e.preventDefault();
+            const id = document.getElementById('quick-note-id').value;
+            const node = nodes.find(n => n.id === id);
+            if (!node) return;
+
+            const contact = document.getElementById('quick-note-contact').value.trim();
+            const office = document.getElementById('quick-note-office').value.trim();
+            const rawLinks = document.getElementById('quick-note-links').value;
+            const notes = rawLinks
+                .split('\n')
+                .map(v => v.trim())
+                .filter(Boolean)
+                .filter(v => /^(https?:\/\/)/.test(v));
+
+            node.contact = contact;
+            node.office = office;
+            node.notes = notes;
+
+            saveData();
+            closeModal('modal-notulensi');
+            updateUI();
+            showToast("✅ Kontak & notulensi diperbarui");
+        }
+
+        // --- UTILS ---
+        function showToast(msg, type = "success") {
+            const toast = document.createElement('div'); toast.className = 'toast';
+            if(type === 'error') toast.style.background = 'var(--danger)';
+            toast.innerText = msg; document.getElementById('toast-container').appendChild(toast);
+            setTimeout(() => { toast.style.opacity = '0'; setTimeout(() => toast.remove(), 500); }, 3000);
+        }
+
+        function populateRelSelects() {
+            const html = nodes.map(n => `<option value="${n.id}">${n.name}</option>`).join('');
+            document.getElementById('rel-src').innerHTML = document.getElementById('rel-tgt').innerHTML = html;
+        }
+
+        document.addEventListener('keydown', (e) => {
+            if (e.key === 'Escape') {
+                document.querySelectorAll('.modal-overlay.show').forEach((modal) => closeModal(modal.id));
+            }
+        });
+
+        document.addEventListener('keydown', (e) => {
+            if (e.key !== 'Tab') return;
+            const modal = document.querySelector('.modal-overlay.show');
+            if (!modal) return;
+            const focusables = modal.querySelectorAll('button, input, select, textarea, [tabindex]:not([tabindex="-1"])');
+            if (!focusables.length) return;
+            const first = focusables[0];
+            const last = focusables[focusables.length - 1];
+            if (e.shiftKey && document.activeElement === first) {
+                e.preventDefault();
+                last.focus();
+            } else if (!e.shiftKey && document.activeElement === last) {
+                e.preventDefault();
+                first.focus();
+            }
+        });
+
+        document.querySelectorAll('.modal-overlay').forEach((modal) => {
+            modal.addEventListener('click', (e) => {
+                if (e.target === modal) closeModal(modal.id);
+            });
+        });
+
+        document.querySelector('.tab-navigation').addEventListener('keydown', (e) => {
+            if (e.key !== 'ArrowRight' && e.key !== 'ArrowLeft') return;
+            const tabs = Array.from(document.querySelectorAll('.tab-button'));
+            const currentIndex = tabs.indexOf(document.activeElement);
+            if (currentIndex < 0) return;
+            const nextIndex = e.key === 'ArrowRight'
+                ? (currentIndex + 1) % tabs.length
+                : (currentIndex - 1 + tabs.length) % tabs.length;
+            const nextTab = tabs[nextIndex];
+            switchTab(nextTab.dataset.tab, nextTab);
+            nextTab.focus();
+        });
+
+        function resetDatabase() {
+            if(!confirm("Kembalikan ke data awal (33 Stakeholder)? Semua perubahan kustom akan hilang.")) return;
+            localStorage.removeItem('hilir_pro_nodes');
+            localStorage.removeItem('hilir_pro_links');
+            localStorage.removeItem('hilir_pro_diskusi');
+            nodes = [...initialNodes];
+            links = [...initialLinks];
+            diskusiRecords = [...initialDiskusiRecords];
+            normalizeDiskusiRecords();
+            updateUI();
+            showToast("✅ Data lokal di-reset");
+        }
+
+        function exportData() {
+            // EXCEL ID FORMAT: ";" separator, "," decimal
+            let csv = "\ufeffID;Nama;Kategori;Peran;Sikap (X);Terlibat (Y);Impact (Z);PIC;Kantor\n";
+            nodes.forEach(n => {
+                const x = n.value[0].toString().replace('.', ',');
+                const y = n.value[1].toString().replace('.', ',');
+                const z = n.value[2].toString().replace('.', ',');
+                csv += `"${n.id}";"${n.name}";"${n.category}";"${n.peran || ''}";${x};${y};${z};"${n.contact || ''}";"${n.office || ''}"\n`;
+            });
+            const blob = new Blob([csv], { type: 'text/csv;charset=utf-8;' });
+            const link = document.createElement('a'); link.href = URL.createObjectURL(blob);
+            link.download = `Hilirisasi_ID_Export_${new Date().toISOString().split('T')[0]}.csv`; link.click();
+            showToast("📊 File Excel diunduh");
+        }
+    </script>
 </body>
-</html> 
+</html>
